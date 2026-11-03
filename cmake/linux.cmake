@@ -1,12 +1,50 @@
-if(UNIX AND NOT APPLE AND NOT MSYS)
-  find_package(LibBFD)
-  find_package(LibDL)
-  find_package(LibRT)
-  find_package(LibUUID)
-endif()
-if(UNIX AND NOT APPLE AND NOT MSYS)
-  list(APPEND LINKLIBS ${LIBBFD_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBRT_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
-endif()
+# @brief      Find Linux system libraries.
+# @details    Discover optional Linux libraries and append their link dependencies
+#             to the platform configuration variables.
+# @note       Output variables: PLATFORM_LIBS, PLATFORM_INCLUDE_DIRS.
+function(platform_find_libraries)
+    set(_platform_libs ${PLATFORM_LIBS})
+    set(_platform_include_dirs ${PLATFORM_INCLUDE_DIRS})
+
+    find_package(LibBFD)
+    find_package(LibDL)
+    find_package(LibRT)
+    find_package(LibUUID)
+
+    list(APPEND _platform_libs ${LIBBFD_LIBRARIES})
+    list(APPEND _platform_libs ${LIBDL_LIBRARIES})
+    list(APPEND _platform_libs ${LIBRT_LIBRARIES})
+    list(APPEND _platform_libs ${LIBUUID_LIBRARIES})
+
+    set(PLATFORM_LIBS "${_platform_libs}" PARENT_SCOPE)
+    set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
+endfunction()
+
+# @brief      Configure Linux compiler settings.
+# @details    Preserve compiler settings supplied by the caller. Platform-specific
+#             compiler options can be added here when required.
+# @note       Output variables: PLATFORM_COMPILE_DEFINITIONS, PLATFORM_COMPILE_OPTIONS,
+#             PLATFORM_LINK_OPTIONS.
+function(platform_configure_compiler)
+    set(_platform_compile_definitions ${PLATFORM_COMPILE_DEFINITIONS})
+    set(_platform_compile_options ${PLATFORM_COMPILE_OPTIONS})
+    set(_platform_link_options ${PLATFORM_LINK_OPTIONS})
+
+    set(PLATFORM_COMPILE_DEFINITIONS "${_platform_compile_definitions}" PARENT_SCOPE)
+    set(PLATFORM_COMPILE_OPTIONS "${_platform_compile_options}" PARENT_SCOPE)
+    set(PLATFORM_LINK_OPTIONS "${_platform_link_options}" PARENT_SCOPE)
+endfunction()
+
+# @brief      Configure Linux installation rules.
+# @details    Provide the platform-specific installation hook. No additional
+#             Linux installation rules are required at this stage.
+# @note       This function currently has no side effects.
+function(platform_configure_install)
+endfunction()
+
+# @brief      Configure Linux uninstallation rules.
+# @details    Provide the platform-specific uninstallation hook. No additional
+#             Linux uninstallation rules are required at this stage.
+# @note       This function currently has no side effects.
+function(platform_configure_uninstall)
+endfunction()
