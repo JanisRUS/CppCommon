@@ -1,37 +1,34 @@
-cmake_minimum_required(VERSION 3.20)
+#
+# Common project settings
+#
 
+cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
-# Platform configuration
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  include(cmake/windows.cmake)
+    include(cmake/windows.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  include(cmake/macos.cmake)
+    include(cmake/macos.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  include(cmake/linux.cmake)
+    include(cmake/linux.cmake)
 else()
-  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-# Doxygen
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-  set(DOXYGEN "doxygen")
-  if(NOT TARGET ${DOXYGEN})
-    add_custom_command(OUTPUT "Doxyfile" COMMAND ${DOXYGEN_EXECUTABLE} "Doxyfile" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/documents")
-    add_custom_target(${DOXYGEN} DEPENDS "Doxyfile")
-    set_target_properties(${DOXYGEN} PROPERTIES FOLDER "doxygen")
-  endif()
-endif()
+# TODO options like ENABLE_TESTS, ENABLE_BENCHMARKS 
 
-# Compiler features
+#
+# Compiler features setup
+#
 include(CodeCoverage)
 include(SetCompilerFeatures)
 include(SetCompilerWarnings)
 include(SetPlatformFeatures)
 include(SystemInformation)
 
-# External packages
+#
+# TODO Common and Platform libraries search
+#
 find_package(Threads REQUIRED)
 
 # Modules
@@ -71,4 +68,16 @@ if(NOT CPPCOMMON_MODULE)
     endforeach()
   endif()
 
+endif()
+
+# Rule "documentation" setup
+find_program(DOXYGEN doxygen)
+if(DOXYGEN)
+    message(STATUS "Doxygen found: ${DOXYGEN}")
+    add_custom_target(
+        doxygen 
+        COMMAND ${DOXYGEN} Doxyfile
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/documents
+        VERBATIM
+    )
 endif()
