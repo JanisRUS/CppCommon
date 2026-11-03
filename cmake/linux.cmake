@@ -28,13 +28,14 @@ function(cppcommon_configure_platform target)
     target_link_libraries(${target} PRIVATE ${CPPCOMMON_RT_LIBRARY})
   endif()
 
-  # UUID support is optional at configure time, matching the previous build.
+  # UUID support is required by uuid.cpp on Linux.
   find_path(CPPCOMMON_UUID_INCLUDE_DIR uuid/uuid.h)
   find_library(CPPCOMMON_UUID_LIBRARY NAMES uuid)
-  if(CPPCOMMON_UUID_INCLUDE_DIR)
-    target_include_directories(${target} PRIVATE ${CPPCOMMON_UUID_INCLUDE_DIR})
+  if(NOT CPPCOMMON_UUID_INCLUDE_DIR OR NOT CPPCOMMON_UUID_LIBRARY)
+    message(FATAL_ERROR
+      "CppCommon requires libuuid development files on Linux (uuid/uuid.h and libuuid)."
+    )
   endif()
-  if(CPPCOMMON_UUID_LIBRARY)
-    target_link_libraries(${target} PRIVATE ${CPPCOMMON_UUID_LIBRARY})
-  endif()
+  target_include_directories(${target} PRIVATE ${CPPCOMMON_UUID_INCLUDE_DIR})
+  target_link_libraries(${target} PRIVATE ${CPPCOMMON_UUID_LIBRARY})
 endfunction()

@@ -21,9 +21,10 @@ function(cppcommon_configure_platform target)
 
   # UUID generation on Windows is provided by the RPC runtime.
   find_library(CPPCOMMON_RPC_LIBRARY NAMES rpcrt4 rpcrt4.lib)
-  if(CPPCOMMON_RPC_LIBRARY)
-    target_link_libraries(${target} PRIVATE ${CPPCOMMON_RPC_LIBRARY})
+  if(NOT CPPCOMMON_RPC_LIBRARY)
+    message(FATAL_ERROR "CppCommon requires the Windows RPC runtime library (rpcrt4).")
   endif()
+  target_link_libraries(${target} PRIVATE ${CPPCOMMON_RPC_LIBRARY})
 
   # Symbol and source-line information in stack traces is optional.
   find_library(CPPCOMMON_DBGHELP_LIBRARY NAMES dbghelp dbghelp.lib)

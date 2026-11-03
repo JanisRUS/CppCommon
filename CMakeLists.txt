@@ -18,11 +18,9 @@ if(DOXYGEN_FOUND)
 endif()
 
 # Project-local CMake modules
-list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-include(CodeCoverage)
-include(SetCompilerWarnings)
-include(SystemInformation)
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CodeCoverage.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetCompilerWarnings.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/SystemInformation.cmake")
 
 # Platform configuration
 if(CYGWIN OR MSYS OR WIN32)
@@ -55,7 +53,7 @@ add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES
 set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries" CXX_EXTENSIONS ON)
 target_compile_features(cppcommon PUBLIC cxx_std_23)
 target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
-target_link_libraries(cppcommon PUBLIC Threads::Threads PRIVATE fmt)
+target_link_libraries(cppcommon PUBLIC Threads::Threads fmt)
 cppcommon_configure_platform(cppcommon)
 list(APPEND INSTALL_TARGETS cppcommon)
 list(APPEND LINKLIBS cppcommon)
