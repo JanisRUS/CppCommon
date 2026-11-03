@@ -24,9 +24,6 @@ if(DOXYGEN_FOUND)
   endif()
 endif()
 
-# CMake module path
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 # Compiler features
 include(CodeCoverage)
 include(SetCompilerFeatures)
