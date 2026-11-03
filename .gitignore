@@ -6,7 +6,6 @@ build
 .claude/worktrees
 
 # CMake
-cmake
 cmake-build-*
 
 # Ctags files
