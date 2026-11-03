@@ -1,10 +1,17 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Global properties
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-# Project name
 project(cppcommon)
+
+# Platform configuration
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  include(cmake/windows.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  include(cmake/macos.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include(cmake/linux.cmake)
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
 # Doxygen
 find_package(Doxygen)
