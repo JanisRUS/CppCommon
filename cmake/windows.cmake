@@ -1,0 +1,34 @@
+function(cppcommon_configure_platform target)
+  # Keep platform definitions scoped to CppCommon.
+  if(CYGWIN)
+    target_compile_definitions(${target} PRIVATE WIN32 WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0A00)
+  else()
+    target_compile_definitions(${target} PRIVATE
+      WIN32
+      WIN32_LEAN_AND_MEAN
+      _CRT_SECURE_NO_DEPRECATE
+      _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+      _WIN32_WINNT=0x0A00
+    )
+  endif()
+
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /bigobj /utf-8 /Zc:__cplusplus)
+  elseif(MINGW OR MSYS)
+    target_compile_options(${target} PRIVATE -Wa,-mbig-obj)
+    target_link_options(${target} INTERFACE -static-libgcc -static-libstdc++)
+  endif()
+
+  # UUID generation on Windows is provided by the RPC runtime.
+  find_library(CPPCOMMON_RPC_LIBRARY NAMES rpcrt4 rpcrt4.lib)
+  if(CPPCOMMON_RPC_LIBRARY)
+    target_link_libraries(${target} PRIVATE ${CPPCOMMON_RPC_LIBRARY})
+  endif()
+
+  # Symbol and source-line information in stack traces is optional.
+  find_library(CPPCOMMON_DBGHELP_LIBRARY NAMES dbghelp dbghelp.lib)
+  if(CPPCOMMON_DBGHELP_LIBRARY)
+    target_compile_definitions(${target} PRIVATE DBGHELP_SUPPORT)
+    target_link_libraries(${target} PRIVATE ${CPPCOMMON_DBGHELP_LIBRARY})
+  endif()
+endfunction()

@@ -6,4 +6,3 @@ vld modules/vld https://github.com/chronoxor/vld.git master
 
 # Scripts
 build build https://github.com/chronoxor/CppBuildScripts.git main
-cmake cmake https://github.com/chronoxor/CppCMakeScripts.git main

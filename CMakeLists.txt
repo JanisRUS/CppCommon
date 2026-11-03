@@ -17,47 +17,31 @@ if(DOXYGEN_FOUND)
   endif()
 endif()
 
-# CMake module path
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Project-local CMake modules
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# Compiler features
 include(CodeCoverage)
-include(SetCompilerFeatures)
 include(SetCompilerWarnings)
-include(SetPlatformFeatures)
 include(SystemInformation)
+
+# Platform configuration
+if(CYGWIN OR MSYS OR WIN32)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows.cmake")
+elseif(APPLE)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos.cmake")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/linux.cmake")
+else()
+  message(FATAL_ERROR
+    "CppCommon does not currently support the ${CMAKE_SYSTEM_NAME} platform."
+  )
+endif()
 
 # External packages
 find_package(Threads REQUIRED)
-if(UNIX AND NOT APPLE AND NOT MSYS)
-  find_package(LibBFD)
-  find_package(LibDL)
-  find_package(LibRT)
-  find_package(LibUUID)
-endif()
-if(WIN32 OR MSYS)
-  find_package(DbgHelp)
-  find_package(RPC)
-  find_package(Userenv)
-endif()
 
 # Modules
 add_subdirectory("modules")
-
-# Link libraries
-list(APPEND LINKLIBS Threads::Threads)
-if(UNIX AND NOT APPLE AND NOT MSYS)
-  list(APPEND LINKLIBS ${LIBBFD_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBDL_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBRT_LIBRARIES})
-  list(APPEND LINKLIBS ${LIBUUID_LIBRARIES})
-endif()
-if(WIN32 OR MSYS)
-  list(APPEND LINKLIBS ${DBGHELP_LIBRARIES})
-  list(APPEND LINKLIBS ${RPC_LIBRARIES})
-  list(APPEND LINKLIBS ${USERENV_LIBRARIES})
-  list(APPEND LINKLIBS ${VLD_LIBRARIES})
-endif()
 
 # System directories
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
@@ -68,9 +52,11 @@ file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
 file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
 file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
 add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
-set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
+set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries" CXX_EXTENSIONS ON)
+target_compile_features(cppcommon PUBLIC cxx_std_23)
 target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
-target_link_libraries(cppcommon ${LINKLIBS} fmt)
+target_link_libraries(cppcommon PUBLIC Threads::Threads PRIVATE fmt)
+cppcommon_configure_platform(cppcommon)
 list(APPEND INSTALL_TARGETS cppcommon)
 list(APPEND LINKLIBS cppcommon)
 
