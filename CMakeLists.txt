@@ -1,147 +1,211 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Global properties
+project(cppcommon LANGUAGES CXX)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Project name
-project(cppcommon)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
-# Doxygen
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-  set(DOXYGEN "doxygen")
-  if(NOT TARGET ${DOXYGEN})
-    add_custom_command(OUTPUT "Doxyfile" COMMAND ${DOXYGEN_EXECUTABLE} "Doxyfile" WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/documents")
-    add_custom_target(${DOXYGEN} DEPENDS "Doxyfile")
-    set_target_properties(${DOXYGEN} PROPERTIES FOLDER "doxygen")
-  endif()
-endif()
+# Параметры дополнительных компонентов.
+option(CPPCOMMON_BUILD_PLUGINS "Собирать плагины" OFF)
+option(CPPCOMMON_BUILD_EXAMPLES "Собирать примеры" OFF)
+option(CPPCOMMON_BUILD_BENCHMARKS "Собирать benchmarks" OFF)
+option(CPPCOMMON_BUILD_TESTS "Собирать тесты" OFF)
+option(CPPCOMMON_BUILD_DOCUMENTATION "Собирать документацию" OFF)
 
-# Project-local CMake modules
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CodeCoverage.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/SetCompilerWarnings.cmake")
-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/SystemInformation.cmake")
-
-# Platform configuration
+# Определение платформы и подключение её конфигурации.
 if(CYGWIN OR MSYS OR WIN32)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows.cmake")
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/windows.cmake")
 elseif(APPLE)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos.cmake")
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/macos.cmake")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/linux.cmake")
+    include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/linux.cmake")
 else()
-  message(FATAL_ERROR
-    "CppCommon does not currently support the ${CMAKE_SYSTEM_NAME} platform."
-  )
+    message(FATAL_ERROR
+        "Платформа ${CMAKE_SYSTEM_NAME} не поддерживается CppCommon."
+    )
 endif()
 
-# External packages
+# Инициализация интерфейса платформенной конфигурации.
+set(PLATFORM_LIBS "")
+set(PLATFORM_INCLUDE_DIRS "")
+set(PLATFORM_COMPILE_DEFINITIONS "")
+set(PLATFORM_COMPILE_OPTIONS "")
+set(PLATFORM_LINK_OPTIONS "")
+
+platform_configure_compiler()
+platform_find_libraries()
+
+# Общие настройки компилятора.
+set(COMMON_COMPILE_OPTIONS "")
+
+if(MSVC)
+    list(APPEND COMMON_COMPILE_OPTIONS
+        /W4
+        /WX
+        /wd4100
+        /wd4250
+    )
+else()
+    list(APPEND COMMON_COMPILE_OPTIONS
+        -Wall
+        -Werror
+        -Wshadow
+        -pedantic
+    )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list(APPEND COMMON_COMPILE_OPTIONS
+            -Wno-maybe-uninitialized
+            -Wno-overflow
+            -Wno-restrict
+            -Wno-stringop-overflow
+        )
+    endif()
+endif()
+
+# Общий интерфейс параметров компиляции для целей проекта.
+add_library(cppcommon_build_options INTERFACE)
+
+target_compile_options(cppcommon_build_options
+    INTERFACE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+# Поиск общих зависимостей основной библиотеки.
 find_package(Threads REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
-# fmt is a public dependency: its types are exposed by public CppCommon headers.
-find_package(fmt CONFIG QUIET)
 if(NOT TARGET fmt::fmt)
-  message(FATAL_ERROR
-    "CppCommon requires the fmt CMake package, but target fmt::fmt was not found. "
-    "Install fmt and make its package configuration available through CMAKE_PREFIX_PATH."
-  )
+    message(FATAL_ERROR
+        "Пакет fmt найден, но target fmt::fmt отсутствует. "
+        "Проверьте установленный CMake package fmt."
+    )
 endif()
 
-# Modules
-add_subdirectory("modules")
+# Основная библиотека.
+file(GLOB_RECURSE CPPCOMMON_HEADER_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.h"
+)
+file(GLOB_RECURSE CPPCOMMON_INLINE_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.inl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.inl"
+)
+file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp"
+)
 
-# System directories
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+add_library(cppcommon
+    ${CPPCOMMON_HEADER_FILES}
+    ${CPPCOMMON_INLINE_FILES}
+    ${CPPCOMMON_SOURCE_FILES}
+)
 
-# Library
-file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
-file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
-file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
-add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
-set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries" CXX_EXTENSIONS ON)
+set_target_properties(cppcommon PROPERTIES
+    CXX_EXTENSIONS ON
+    FOLDER "libraries"
+)
+
 target_compile_features(cppcommon PUBLIC cxx_std_23)
-target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
-target_link_libraries(cppcommon PUBLIC Threads::Threads fmt::fmt)
-cppcommon_configure_platform(cppcommon)
-list(APPEND INSTALL_TARGETS cppcommon)
-list(APPEND LINKLIBS cppcommon)
 
-# Additional module components: benchmarks, examples, plugins, tests, tools and install
-if(NOT CPPCOMMON_MODULE)
+target_include_directories(cppcommon
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
-  # Plugins
-  file(GLOB PLUGIN_NAMES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/plugins" "plugins/*")
-  foreach(PLUGIN_NAME ${PLUGIN_NAMES})
-    file(GLOB PLUGIN_HEADER_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugins/${PLUGIN_NAME}/*.h")
-    file(GLOB PLUGIN_INLINE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugins/${PLUGIN_NAME}/*.inl")
-    file(GLOB PLUGIN_SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/plugins/${PLUGIN_NAME}/*.cpp")
-    set(PLUGIN_TARGET "plugin-${PLUGIN_NAME}")
-    add_library(${PLUGIN_TARGET} SHARED ${PLUGIN_HEADER_FILES} ${PLUGIN_INLINE_FILES} ${PLUGIN_SOURCE_FILES})
-    set_target_properties(${PLUGIN_TARGET} PROPERTIES COMPILE_DEFINITIONS "EXPORTS" COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "plugins")
-    target_link_libraries(${PLUGIN_TARGET} ${LINKLIBS})
-    list(APPEND PLUGINS ${PLUGIN_TARGET})
-    list(APPEND INSTALL_TARGETS ${PLUGIN_TARGET})
-    list(APPEND INSTALL_TARGETS_PDB ${PLUGIN_TARGET})
-  endforeach()
-
-  # Examples
-  file(GLOB EXAMPLE_HEADER_FILES "examples/*.h")
-  file(GLOB EXAMPLE_INLINE_FILES "examples/*.inl")
-  file(GLOB EXAMPLE_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/examples" "examples/*.cpp")
-  foreach(EXAMPLE_SOURCE_FILE ${EXAMPLE_SOURCE_FILES})
-    string(REGEX REPLACE "(.*)\\.cpp" "\\1" EXAMPLE_NAME ${EXAMPLE_SOURCE_FILE})
-    set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
-    add_executable(${EXAMPLE_TARGET} ${EXAMPLE_HEADER_FILES} ${EXAMPLE_INLINE_FILES} "examples/${EXAMPLE_SOURCE_FILE}")
-    add_dependencies(${EXAMPLE_TARGET} ${PLUGINS})
-    set_target_properties(${EXAMPLE_TARGET} PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "examples")
-    target_link_libraries(${EXAMPLE_TARGET} ${LINKLIBS})
-    list(APPEND INSTALL_TARGETS ${EXAMPLE_TARGET})
-    list(APPEND INSTALL_TARGETS_PDB ${EXAMPLE_TARGET})
-  endforeach()
-
-  # Benchmarks
-  file(GLOB BENCHMARK_HEADER_FILES "performance/*.h")
-  file(GLOB BENCHMARK_INLINE_FILES "performance/*.inl")
-  file(GLOB BENCHMARK_SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/performance" "performance/*.cpp")
-  foreach(BENCHMARK_SOURCE_FILE ${BENCHMARK_SOURCE_FILES})
-    string(REGEX REPLACE "(.*)\\.cpp" "\\1" BENCHMARK_NAME ${BENCHMARK_SOURCE_FILE})
-    set(BENCHMARK_TARGET "cppcommon-performance-${BENCHMARK_NAME}")
-    add_executable(${BENCHMARK_TARGET} ${BENCHMARK_HEADER_FILES} ${BENCHMARK_INLINE_FILES} "performance/${BENCHMARK_SOURCE_FILE}")
-    add_dependencies(${BENCHMARK_TARGET} ${PLUGINS})
-    set_target_properties(${BENCHMARK_TARGET} PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "performance")
-    target_link_libraries(${BENCHMARK_TARGET} ${LINKLIBS} cppbenchmark)
-    list(APPEND INSTALL_TARGETS ${BENCHMARK_TARGET})
-    list(APPEND INSTALL_TARGETS_PDB ${BENCHMARK_TARGET})
-  endforeach()
-
-  # Tests
-  file(GLOB TESTS_HEADER_FILES "tests/*.h")
-  file(GLOB TESTS_INLINE_FILES "tests/*.inl")
-  file(GLOB TESTS_SOURCE_FILES "tests/*.cpp")
-  add_executable(cppcommon-tests ${TESTS_HEADER_FILES} ${TESTS_INLINE_FILES} ${TESTS_SOURCE_FILES})
-  add_dependencies(cppcommon-tests ${PLUGINS})
-  set_target_properties(cppcommon-tests PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "tests")
-  target_include_directories(cppcommon-tests PRIVATE Catch2)
-  target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
-  list(APPEND INSTALL_TARGETS cppcommon-tests)
-  list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
-
-  # CTest
-  include(CTest)
-  add_test(cppcommon-tests cppcommon-tests --durations yes --order lex)
-
-  # Install
-  install(TARGETS ${INSTALL_TARGETS}
-    RUNTIME DESTINATION "${PROJECT_SOURCE_DIR}/bin"
-    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/bin"
-    ARCHIVE DESTINATION "${PROJECT_SOURCE_DIR}/bin")
-
-  # Install *.pdb files
-  if(MSVC)
-    foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
-      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
-    endforeach()
-  endif()
-
+if(PLATFORM_INCLUDE_DIRS)
+    target_include_directories(cppcommon PRIVATE ${PLATFORM_INCLUDE_DIRS})
 endif()
+
+if(PLATFORM_COMPILE_DEFINITIONS)
+    target_compile_definitions(cppcommon PRIVATE ${PLATFORM_COMPILE_DEFINITIONS})
+endif()
+
+target_compile_options(cppcommon
+    PRIVATE
+        ${COMMON_COMPILE_OPTIONS}
+)
+
+if(PLATFORM_COMPILE_OPTIONS)
+    target_compile_options(cppcommon PRIVATE ${PLATFORM_COMPILE_OPTIONS})
+endif()
+
+if(PLATFORM_LINK_OPTIONS)
+    target_link_options(cppcommon INTERFACE ${PLATFORM_LINK_OPTIONS})
+endif()
+
+if(PLATFORM_LIBS)
+    target_link_libraries(cppcommon PRIVATE ${PLATFORM_LIBS})
+endif()
+
+target_link_libraries(cppcommon
+    PUBLIC
+        Threads::Threads
+        fmt::fmt
+)
+
+# Платформенные точки расширения установки и удаления.
+platform_configure_install()
+platform_configure_uninstall()
+
+# Дополнительные компоненты конфигурируются только по запросу.
+if(CPPCOMMON_BUILD_PLUGINS)
+    add_subdirectory(plugins)
+endif()
+
+if(CPPCOMMON_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
+if(CPPCOMMON_BUILD_BENCHMARKS)
+    add_subdirectory(performance)
+endif()
+
+if(CPPCOMMON_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+if(CPPCOMMON_BUILD_DOCUMENTATION)
+    find_package(Doxygen REQUIRED)
+
+    add_custom_target(cppcommon-docs
+        COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/documents/Doxyfile"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/documents"
+        COMMENT "Генерация документации CppCommon"
+        VERBATIM
+    )
+    set_target_properties(cppcommon-docs PROPERTIES FOLDER "documentation")
+endif()
+
+# Установка библиотеки и публичных заголовков.
+install(TARGETS cppcommon
+    EXPORT cppcommonTargets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppCommonConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon"
+)
+
+install(EXPORT cppcommonTargets
+    NAMESPACE CppCommon::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon"
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon"
+)

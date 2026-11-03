@@ -1,0 +1,60 @@
+file(GLOB PLUGIN_DIRECTORIES CONFIGURE_DEPENDS LIST_DIRECTORIES TRUE
+    "${CMAKE_CURRENT_SOURCE_DIR}/*"
+)
+
+set(CPPCOMMON_PLUGIN_TARGETS "")
+
+foreach(PLUGIN_DIRECTORY IN LISTS PLUGIN_DIRECTORIES)
+    if(NOT IS_DIRECTORY "${PLUGIN_DIRECTORY}")
+        continue()
+    endif()
+
+    get_filename_component(PLUGIN_NAME "${PLUGIN_DIRECTORY}" NAME)
+
+    file(GLOB_RECURSE PLUGIN_HEADER_FILES CONFIGURE_DEPENDS
+        "${PLUGIN_DIRECTORY}/*.h"
+    )
+    file(GLOB_RECURSE PLUGIN_INLINE_FILES CONFIGURE_DEPENDS
+        "${PLUGIN_DIRECTORY}/*.inl"
+    )
+    file(GLOB_RECURSE PLUGIN_SOURCE_FILES CONFIGURE_DEPENDS
+        "${PLUGIN_DIRECTORY}/*.cpp"
+    )
+
+    if(NOT PLUGIN_SOURCE_FILES)
+        continue()
+    endif()
+
+    set(PLUGIN_TARGET "plugin-${PLUGIN_NAME}")
+
+    add_library(${PLUGIN_TARGET} SHARED
+        ${PLUGIN_HEADER_FILES}
+        ${PLUGIN_INLINE_FILES}
+        ${PLUGIN_SOURCE_FILES}
+    )
+
+    target_compile_definitions(${PLUGIN_TARGET} PRIVATE EXPORTS)
+
+    target_include_directories(${PLUGIN_TARGET}
+        PRIVATE
+            "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+
+    target_link_libraries(${PLUGIN_TARGET}
+        PRIVATE
+            cppcommon
+            cppcommon_build_options
+    )
+
+    set_target_properties(${PLUGIN_TARGET} PROPERTIES FOLDER "plugins")
+
+    install(TARGETS ${PLUGIN_TARGET}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+
+    list(APPEND CPPCOMMON_PLUGIN_TARGETS ${PLUGIN_TARGET})
+endforeach()
+
+set(CPPCOMMON_PLUGIN_TARGETS "${CPPCOMMON_PLUGIN_TARGETS}" PARENT_SCOPE)

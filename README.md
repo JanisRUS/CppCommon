@@ -1,115 +1,84 @@
 # CppCommon
 
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Release](https://img.shields.io/github/release/chronoxor/CppCommon.svg?sort=semver)](https://github.com/chronoxor/CppCommon/releases)
-<br/>
-[![Linux (clang)](https://github.com/chronoxor/CppCommon/actions/workflows/build-linux-clang.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-linux-clang.yml)
-[![Linux (gcc)](https://github.com/chronoxor/CppCommon/actions/workflows/build-linux-gcc.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-linux-gcc.yml)
-[![MacOS](https://github.com/chronoxor/CppCommon/actions/workflows/build-macos.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-macos.yml)
-<br/>
-[![Windows (Cygwin)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-cygwin.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-cygwin.yml)
-[![Windows (MSYS2)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-msys2.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-msys2.yml)
-[![Windows (MinGW)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-mingw.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-mingw.yml)
-[![Windows (Visual Studio)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-vs.yml/badge.svg)](https://github.com/chronoxor/CppCommon/actions/workflows/build-windows-vs.yml)
 
-C++ Common Library contains reusable components and patterns for error and
-exceptions handling, filesystem manipulations, math, string format and
-encoding, shared memory, threading, time management and others.
+C++ Common Library содержит переиспользуемые компоненты для обработки ошибок и исключений, работы с файловой системой, строками, памятью, потоками, временем и другими системными возможностями.
 
-[CppCommon API reference](https://chronoxor.github.io/CppCommon/index.html)
+[Документация API CppCommon](https://chronoxor.github.io/CppCommon/index.html)
 
-# Contents
-  * [Features](#features)
-  * [Requirements](#requirements)
-  * [How to build?](#how-to-build)
+## Возможности
 
-# Features
-* Cross platform (Linux, MacOS, Windows)
-* Exception handling model
-* Filesystem manipulations
-* String encoding converters
-* String format using [{fmt} library](http://fmtlib.net)
-* CPU, memory, environment
-* Shared memory
-* Stack trace
-* UUID generator
-* Thread extensions (priority, affinity, yield)
-* Thread barrier, latch
-* Synchronization primitives
-* Named synchronization primitives
-* Producer/consumer queues
-* Time management
-* Utilities
+- Кроссплатформенная поддержка Linux, macOS и Windows.
+- Обработка исключений и системных ошибок.
+- Работа с файловой системой.
+- Кодирование строк и форматирование с помощью [{fmt}](https://fmt.dev/).
+- CPU, память и переменные окружения.
+- Shared memory.
+- Stack trace.
+- Генерация UUID.
+- Потоки и примитивы синхронизации.
+- Управление временем.
 
-# Requirements
-* Linux
-* MacOS
-* Windows
-* [cmake](https://www.cmake.org)
-* [gcc](https://gcc.gnu.org)
-* [git](https://git-scm.com)
-* [gil](https://github.com/chronoxor/gil.git)
-* [python3](https://www.python.org)
+## Требования
 
-Optional:
-* [clang](https://clang.llvm.org)
-* [CLion](https://www.jetbrains.com/clion)
-* [Cygwin](https://cygwin.com)
-* [MSYS2](https://www.msys2.org)
-* [MinGW](https://mingw-w64.org/doku.php)
-* [Visual Studio](https://www.visualstudio.com)
+- CMake 3.20 или новее.
+- Компилятор с поддержкой C++23.
+- Установленная библиотека [fmt](https://github.com/fmtlib/fmt) с CMake package config.
+- Linux: development package для libuuid.
+- Остальные платформенные библиотеки и заголовки, используемые проектом.
 
-# How to build?
+CppCommon не загружает и не собирает сторонние зависимости автоматически. Разработчик самостоятельно устанавливает зависимости и при необходимости указывает нестандартные пути через переменные CMake, например `CMAKE_PREFIX_PATH`, `fmt_DIR`, `CPPCOMMON_UUID_INCLUDE_DIR` и `CPPCOMMON_UUID_LIBRARY`.
 
-### Linux: install required packages
+## Сборка
+
+### Конфигурация
+
 ```shell
-sudo apt-get install -y binutils-dev uuid-dev
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 ```
 
-### Install [gil (git links) tool](https://github.com/chronoxor/gil)
+Если зависимости установлены в нестандартном префиксе:
+
 ```shell
-pip3 install gil
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/dependencies
 ```
 
-### Setup repository
+Для Windows можно указать каталог package config конкретной библиотеки:
+
 ```shell
-git clone https://github.com/chronoxor/CppCommon.git
-cd CppCommon
-gil update
+cmake -S . -B build -Dfmt_DIR="D:/Libraries/fmt/lib/cmake/fmt"
 ```
 
-### Linux
+### Компиляция
+
 ```shell
-cd build
-./unix.sh
+cmake --build build --config Release
 ```
 
-### MacOS
+### Установка
+
 ```shell
-cd build
-./unix.sh
+cmake --install build --prefix /path/to/install
 ```
 
-### Windows (Cygwin)
+После установки библиотека доступна как CMake package `CppCommon` с target `CppCommon::cppcommon`.
+
+## Дополнительные компоненты
+
+Основная библиотека собирается по умолчанию. Дополнительные компоненты включаются явно:
+
+| Опция | Компонент | Зависимости |
+|---|---|---|
+| `CPPCOMMON_BUILD_PLUGINS` | Плагины | CppCommon |
+| `CPPCOMMON_BUILD_EXAMPLES` | Примеры | CppCommon |
+| `CPPCOMMON_BUILD_BENCHMARKS` | Benchmarks | Установленный CppBenchmark |
+| `CPPCOMMON_BUILD_TESTS` | Тесты | Установленный Catch2 3 |
+| `CPPCOMMON_BUILD_DOCUMENTATION` | Документация | Doxygen |
+
+Например, конфигурация с тестами:
+
 ```shell
-cd build
-unix.bat
+cmake -S . -B build -DCPPCOMMON_BUILD_TESTS=ON
 ```
 
-### Windows (MSYS2)
-```shell
-cd build
-unix.bat
-```
-
-### Windows (MinGW)
-```shell
-cd build
-mingw.bat
-```
-
-### Windows (Visual Studio)
-```shell
-cd build
-vs.bat
-```
+Зависимости дополнительных компонентов не ищутся, если соответствующая опция выключена.
