@@ -38,6 +38,15 @@ endif()
 # External packages
 find_package(Threads REQUIRED)
 
+# fmt is a public dependency: its types are exposed by public CppCommon headers.
+find_package(fmt CONFIG QUIET)
+if(NOT TARGET fmt::fmt)
+  message(FATAL_ERROR
+    "CppCommon requires the fmt CMake package, but target fmt::fmt was not found. "
+    "Install fmt and make its package configuration available through CMAKE_PREFIX_PATH."
+  )
+endif()
+
 # Modules
 add_subdirectory("modules")
 
@@ -53,7 +62,7 @@ add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES
 set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries" CXX_EXTENSIONS ON)
 target_compile_features(cppcommon PUBLIC cxx_std_23)
 target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
-target_link_libraries(cppcommon PUBLIC Threads::Threads fmt)
+target_link_libraries(cppcommon PUBLIC Threads::Threads fmt::fmt)
 cppcommon_configure_platform(cppcommon)
 list(APPEND INSTALL_TARGETS cppcommon)
 list(APPEND LINKLIBS cppcommon)
