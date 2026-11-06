@@ -75,23 +75,67 @@ find_package(Threads REQUIRED)
 # The fmt module is required by the core library.
 add_subdirectory("modules")
 
-# Link libraries
-list(APPEND LINKLIBS Threads::Threads)
-
-# System directories
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+# Apply project-wide compiler and linker settings.
+# The module targets above keep their own compiler configuration.
+add_compile_options(${COMMON_COMPILE_OPTIONS} ${PEDANTIC_COMPILE_OPTIONS} ${PLATFORM_COMPILE_OPTIONS})
+foreach(_option IN LISTS COMMON_CXX_COMPILE_OPTIONS)
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${_option}>")
+endforeach()
+add_compile_definitions(${PLATFORM_COMPILE_DEFINITIONS})
+add_link_options(${COMMON_LINK_OPTIONS} ${PLATFORM_LINK_OPTIONS})
 
 # Library
 file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
 file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
 file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
-add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
-set_target_properties(cppcommon PROPERTIES FOLDER "libraries")
-target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
-target_link_libraries(cppcommon ${LINKLIBS} fmt)
+
+add_library(cppcommon
+    ${LIB_HEADER_FILES}
+    ${LIB_INLINE_FILES}
+    ${LIB_SOURCE_FILES}
+)
+
+set_property(TARGET cppcommon PROPERTY FOLDER "libraries")
+
+target_include_directories(cppcommon
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
+target_link_libraries(cppcommon
+    PUBLIC
+        Threads::Threads
+        fmt
+)
+
+# Visual Leak Detector is an optional Windows-only core integration.
+if(CPPCOMMON_ENABLE_VLD)
+    if(NOT WIN32)
+        message(FATAL_ERROR "CPPCOMMON_ENABLE_VLD is supported only on Windows")
+    endif()
+
+    find_path(VLD_INCLUDE_DIR
+        NAMES vld.h
+        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
+    )
+    find_library(VLD_LIBRARY
+        NAMES vld
+        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
+    )
+    mark_as_advanced(VLD_INCLUDE_DIR VLD_LIBRARY)
+
+    if(NOT VLD_INCLUDE_DIR OR NOT VLD_LIBRARY)
+        message(FATAL_ERROR "CPPCOMMON_ENABLE_VLD is enabled, but Visual Leak Detector was not found")
+    endif()
+
+    target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
+    target_link_libraries(cppcommon PRIVATE "${VLD_LIBRARY}")
+    target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
+endif()
+
 list(APPEND INSTALL_TARGETS cppcommon)
-list(APPEND LINKLIBS cppcommon)
+
+# Keep the legacy dependency list for the existing optional component scripts.
+set(LINKLIBS cppcommon)
 
 # Optional components
 # Include component scripts from the project root because their source paths
