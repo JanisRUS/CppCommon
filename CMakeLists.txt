@@ -94,20 +94,23 @@ list(APPEND INSTALL_TARGETS cppcommon)
 list(APPEND LINKLIBS cppcommon)
 
 # Optional components
+# Include component scripts from the project root because their source paths
+# are intentionally relative to CMAKE_CURRENT_SOURCE_DIR.
 if(CPPCOMMON_BUILD_PLUGINS)
-    add_subdirectory("plugins")
+    include(plugins/CMakeLists.txt)
 endif()
 
 if(BUILD_TESTING)
-    add_subdirectory("tests")
+    include(CTest)
+    include(tests/CMakeLists.txt)
 endif()
 
 if(CPPCOMMON_BUILD_EXAMPLES)
-    add_subdirectory("examples")
+    include(examples/CMakeLists.txt)
 endif()
 
 if(CPPCOMMON_BUILD_BENCHMARKS)
-    add_subdirectory("performance")
+    include(performance/CMakeLists.txt)
 endif()
 
 # Additional module components: installation
