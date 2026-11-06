@@ -20,10 +20,13 @@ endif()
 #
 # Compiler features setup
 #
+# TODO Later
 include(CodeCoverage)
+# TODO Should be replaced with platform_configure_compiler functions 
 include(SetCompilerFeatures)
 include(SetCompilerWarnings)
 include(SetPlatformFeatures)
+# TODO Place data from deleted common.cmake from CppCmakeScripts
 include(SystemInformation)
 
 #
