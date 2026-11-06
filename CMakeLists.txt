@@ -5,6 +5,15 @@
 cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
+# Optional components
+option(BUILD_TESTING "Build unit and integration tests" OFF)
+option(CPPCOMMON_BUILD_EXAMPLES "Build examples" OFF)
+option(CPPCOMMON_BUILD_BENCHMARKS "Build performance benchmarks" OFF)
+option(CPPCOMMON_BUILD_PLUGINS "Build plugins" OFF)
+option(CPPCOMMON_BUILD_DOCUMENTATION "Build documentation" OFF)
+option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
+option(CPPCOMMON_ENABLE_VLD "Enable Visual Leak Detector integration" OFF)
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     include(cmake/windows.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -14,8 +23,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# TODO options like ENABLE_TESTS, ENABLE_BENCHMARKS 
 
 #
 # Compiler features setup
@@ -65,7 +72,7 @@ message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VER
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# Modules
+# The fmt module is required by the core library.
 add_subdirectory("modules")
 
 # Link libraries
@@ -86,7 +93,24 @@ target_link_libraries(cppcommon ${LINKLIBS} fmt)
 list(APPEND INSTALL_TARGETS cppcommon)
 list(APPEND LINKLIBS cppcommon)
 
-# Additional module components: benchmarks, examples, plugins, tests, tools and install
+# Optional components
+if(CPPCOMMON_BUILD_PLUGINS)
+    add_subdirectory("plugins")
+endif()
+
+if(BUILD_TESTING)
+    add_subdirectory("tests")
+endif()
+
+if(CPPCOMMON_BUILD_EXAMPLES)
+    add_subdirectory("examples")
+endif()
+
+if(CPPCOMMON_BUILD_BENCHMARKS)
+    add_subdirectory("performance")
+endif()
+
+# Additional module components: installation
 if(NOT CPPCOMMON_MODULE)
 
   # Install
@@ -105,13 +129,17 @@ if(NOT CPPCOMMON_MODULE)
 endif()
 
 # Rule "documentation" setup
-find_program(DOXYGEN doxygen)
-if(DOXYGEN)
-    message(STATUS "Doxygen found: ${DOXYGEN}")
-    add_custom_target(
-        doxygen 
-        COMMAND ${DOXYGEN} Doxyfile
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/documents
-        VERBATIM
-    )
+if(CPPCOMMON_BUILD_DOCUMENTATION)
+    find_program(DOXYGEN doxygen)
+    if(DOXYGEN)
+        message(STATUS "Doxygen found: ${DOXYGEN}")
+        add_custom_target(
+            doxygen
+            COMMAND ${DOXYGEN} Doxyfile
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/documents
+            VERBATIM
+        )
+    else()
+        message(FATAL_ERROR "CPPCOMMON_BUILD_DOCUMENTATION is enabled, but Doxygen was not found")
+    endif()
 endif()
