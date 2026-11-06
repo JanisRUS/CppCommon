@@ -16,7 +16,7 @@ function(platform_find_libraries)
     list(APPEND _platform_libs ${RPC_LIBRARIES})
     list(APPEND _platform_libs ${USERENV_LIBRARIES})
 
-    # Visual Leak Detector is optional.
+    # Visual Leak Detector is optional
     find_path(VLD_INCLUDE_DIR
         NAMES vld.h
         HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"

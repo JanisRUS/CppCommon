@@ -21,9 +21,9 @@ endif()
 # Compiler features setup
 #
 
+# TODO Move to the cmake/codeCoverage.cmake
 include(CodeCoverage)
 
-# Common compiler settings
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -34,11 +34,11 @@ set(PEDANTIC_COMPILE_OPTIONS)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     list(APPEND COMMON_CXX_COMPILE_OPTIONS -stdlib=libc++)
-    list(APPEND COMMON_LINK_OPTIONS -stdlib=libc++)
+    list(APPEND COMMON_LINK_OPTIONS        -stdlib=libc++)
 endif()
 
 if(NOT MSVC)
-    list(APPEND COMMON_COMPILE_OPTIONS -Wall -Werror)
+    list(APPEND COMMON_COMPILE_OPTIONS   -Wall    -Werror)
     list(APPEND PEDANTIC_COMPILE_OPTIONS -Wshadow -pedantic)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -51,14 +51,13 @@ if(NOT MSVC)
     endif()
 endif()
 
-# Initialize platform compiler settings
 set(PLATFORM_COMPILE_DEFINITIONS)
 set(PLATFORM_COMPILE_OPTIONS)
 set(PLATFORM_LINK_OPTIONS)
 
 platform_configure_compiler()
 
-include(SystemInformation)
+message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
 
 #
 # TODO Common and Platform libraries search
