@@ -20,18 +20,50 @@ endif()
 #
 # Compiler features setup
 #
-# TODO Later
+
 include(CodeCoverage)
-# TODO Should be replaced with platform_configure_compiler functions 
-include(SetCompilerFeatures)
-include(SetCompilerWarnings)
-include(SetPlatformFeatures)
-# TODO Place data from deleted common.cmake from CppCmakeScripts
+
+# Common compiler settings
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS ON)
+
+set(COMMON_COMPILE_OPTIONS)
+set(COMMON_CXX_COMPILE_OPTIONS)
+set(COMMON_LINK_OPTIONS)
+set(PEDANTIC_COMPILE_OPTIONS)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    list(APPEND COMMON_CXX_COMPILE_OPTIONS -stdlib=libc++)
+    list(APPEND COMMON_LINK_OPTIONS -stdlib=libc++)
+endif()
+
+if(NOT MSVC)
+    list(APPEND COMMON_COMPILE_OPTIONS -Wall -Werror)
+    list(APPEND PEDANTIC_COMPILE_OPTIONS -Wshadow -pedantic)
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list(APPEND PEDANTIC_COMPILE_OPTIONS
+            -Wno-maybe-uninitialized
+            -Wno-overflow
+            -Wno-restrict
+            -Wno-stringop-overflow
+        )
+    endif()
+endif()
+
+# Initialize platform compiler settings
+set(PLATFORM_COMPILE_DEFINITIONS)
+set(PLATFORM_COMPILE_OPTIONS)
+set(PLATFORM_LINK_OPTIONS)
+
+platform_configure_compiler()
+
 include(SystemInformation)
 
 #
 # TODO Common and Platform libraries search
 #
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Modules
@@ -49,7 +81,7 @@ file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
 file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
 file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
 add_library(cppcommon ${LIB_HEADER_FILES} ${LIB_INLINE_FILES} ${LIB_SOURCE_FILES})
-set_target_properties(cppcommon PROPERTIES COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}" FOLDER "libraries")
+set_target_properties(cppcommon PROPERTIES FOLDER "libraries")
 target_include_directories(cppcommon PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" PUBLIC ${vld})
 target_link_libraries(cppcommon ${LINKLIBS} fmt)
 list(APPEND INSTALL_TARGETS cppcommon)
