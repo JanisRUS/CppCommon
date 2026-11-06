@@ -75,12 +75,18 @@ find_package(Threads REQUIRED)
 # The fmt module is required by the core library.
 add_subdirectory("modules")
 
+# System include directories for internal modules and plugins.
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+
 # Apply project-wide compiler and linker settings.
 # The module targets above keep their own compiler configuration.
-add_compile_options(${COMMON_COMPILE_OPTIONS} ${PEDANTIC_COMPILE_OPTIONS} ${PLATFORM_COMPILE_OPTIONS})
-foreach(_option IN LISTS COMMON_CXX_COMPILE_OPTIONS)
-    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:${_option}>")
-endforeach()
+add_compile_options(
+    ${COMMON_COMPILE_OPTIONS}
+    ${COMMON_CXX_COMPILE_OPTIONS}
+    ${PEDANTIC_COMPILE_OPTIONS}
+    ${PLATFORM_COMPILE_OPTIONS}
+)
 add_compile_definitions(${PLATFORM_COMPILE_DEFINITIONS})
 add_link_options(${COMMON_LINK_OPTIONS} ${PLATFORM_LINK_OPTIONS})
 
@@ -109,26 +115,8 @@ target_link_libraries(cppcommon
 
 # Visual Leak Detector is an optional Windows-only core integration.
 if(CPPCOMMON_ENABLE_VLD)
-    if(NOT WIN32)
-        message(FATAL_ERROR "CPPCOMMON_ENABLE_VLD is supported only on Windows")
-    endif()
-
-    find_path(VLD_INCLUDE_DIR
-        NAMES vld.h
-        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
-    )
-    find_library(VLD_LIBRARY
-        NAMES vld
-        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
-    )
-    mark_as_advanced(VLD_INCLUDE_DIR VLD_LIBRARY)
-
-    if(NOT VLD_INCLUDE_DIR OR NOT VLD_LIBRARY)
-        message(FATAL_ERROR "CPPCOMMON_ENABLE_VLD is enabled, but Visual Leak Detector was not found")
-    endif()
-
     target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
-    target_link_libraries(cppcommon PRIVATE "${VLD_LIBRARY}")
+    target_link_libraries(cppcommon PRIVATE VLD::VLD)
     target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
 endif()
 
