@@ -77,6 +77,7 @@ message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VER
 #
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+platform_find_libraries()
 
 # The fmt module is required by the core library.
 add_subdirectory("modules")
@@ -120,6 +121,8 @@ target_link_libraries(cppcommon
         Threads::Threads
         fmt
 )
+
+platform_link_libraries(cppcommon)
 
 # Visual Leak Detector is an optional Windows-only core integration.
 if(CPPCOMMON_ENABLE_VLD)
