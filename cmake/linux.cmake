@@ -22,6 +22,21 @@ function(platform_find_libraries)
     set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
 endfunction()
 
+# @brief    Link Linux system libraries to a target
+# @details  Apply platform-specific dependencies to the requested target
+# @param    target Target name
+function(platform_link_libraries target)
+    if("${target}" STREQUAL "cppcommon")
+        if(PLATFORM_INCLUDE_DIRS)
+            target_include_directories(${target} PRIVATE ${PLATFORM_INCLUDE_DIRS})
+        endif()
+
+        if(PLATFORM_LIBS)
+            target_link_libraries(${target} PRIVATE ${PLATFORM_LIBS})
+        endif()
+    endif()
+endfunction()
+
 # @brief    Configure Linux compiler settings
 # @details  Preserve compiler settings supplied by the caller. Platform-specific
 #               compiler options can be added here when required
