@@ -5,7 +5,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
-# Optional components
+#
+# Project options
+#
 option(BUILD_TESTING                       "Build unit and integration tests"          OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
 option(CPPCOMMON_BUILD_BENCHMARKS          "Build performance benchmarks"              OFF)
@@ -14,7 +16,11 @@ option(CPPCOMMON_BUILD_DOCUMENTATION       "Build documentation"                
 option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
 option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integration"   OFF)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#
+# Platform detection
+#
+
+if(CMAKE_SYSTEM_NAME     STREQUAL "Windows")
     include(cmake/windows.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     include(cmake/macos.cmake)
@@ -90,8 +96,10 @@ add_compile_options(
 add_compile_definitions(${PLATFORM_COMPILE_DEFINITIONS})
 add_link_options(${COMMON_LINK_OPTIONS} ${PLATFORM_LINK_OPTIONS})
 
+#
 # Library
-file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h" "source/*.h")
+#
+file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h"   "source/*.h")
 file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
 file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
 
@@ -116,7 +124,7 @@ target_link_libraries(cppcommon
 # Visual Leak Detector is an optional Windows-only core integration.
 if(CPPCOMMON_ENABLE_VLD)
     target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
-    target_link_libraries(cppcommon PRIVATE VLD::VLD)
+    target_link_libraries(     cppcommon PRIVATE VLD::VLD)
     target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
 endif()
 
