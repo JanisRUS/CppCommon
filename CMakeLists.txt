@@ -70,24 +70,6 @@ set(PLATFORM_LINK_OPTIONS)
 
 platform_configure_compiler()
 
-message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
-
-#
-# TODO Common and Platform libraries search
-#
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-platform_find_libraries()
-
-# The fmt module is required by the core library.
-add_subdirectory("modules")
-
-# System include directories for internal modules and plugins.
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
-
-# Apply project-wide compiler and linker settings.
-# The module targets above keep their own compiler configuration.
 add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
     ${COMMON_CXX_COMPILE_OPTIONS}
@@ -97,9 +79,25 @@ add_compile_options(
 add_compile_definitions(${PLATFORM_COMPILE_DEFINITIONS})
 add_link_options(${COMMON_LINK_OPTIONS} ${PLATFORM_LINK_OPTIONS})
 
+message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
+
 #
-# Library
+# Libraries setup
 #
+# TODO Legacy. Remove
+add_subdirectory("modules")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+platform_find_libraries()
+
+#
+# Library target
+#
+
 file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h"   "source/*.h")
 file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
 file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
@@ -122,23 +120,24 @@ target_link_libraries(cppcommon
         fmt
 )
 
+platform_configure_target(cppcommon)
 platform_link_libraries(cppcommon)
 
-# Visual Leak Detector is an optional Windows-only core integration.
+# TODO VLD is only for windows so we have to move it to windows.cmake
 if(CPPCOMMON_ENABLE_VLD)
     target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
     target_link_libraries(     cppcommon PRIVATE VLD::VLD)
     target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
 endif()
 
-list(APPEND INSTALL_TARGETS cppcommon)
 
-# Keep the legacy dependency list for the existing optional component scripts.
+# TODO Something
+list(APPEND INSTALL_TARGETS cppcommon)
 set(LINKLIBS cppcommon)
 
-# Optional components
-# Include component scripts from the project root because their source paths
-# are intentionally relative to CMAKE_CURRENT_SOURCE_DIR.
+#
+# TODO Additional targets
+#
 if(CPPCOMMON_BUILD_PLUGINS)
     include(plugins/CMakeLists.txt)
 endif()
@@ -156,7 +155,9 @@ if(CPPCOMMON_BUILD_BENCHMARKS)
     include(performance/CMakeLists.txt)
 endif()
 
-# Additional module components: installation
+#
+# TODO Install rule configuration
+#
 if(NOT CPPCOMMON_MODULE)
 
   # Install
@@ -174,7 +175,15 @@ if(NOT CPPCOMMON_MODULE)
 
 endif()
 
-# Rule "documentation" setup
+#
+# TODO Uninstall rule configuration
+#
+
+#TODO
+
+#
+# TODO Documentation rule configuration
+#
 if(CPPCOMMON_BUILD_DOCUMENTATION)
     find_program(DOXYGEN doxygen)
     if(DOXYGEN)
