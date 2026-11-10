@@ -37,6 +37,15 @@ function(platform_link_libraries target)
     endif()
 endfunction()
 
+# @brief    Configure target-specific Linux settings
+# @details  Apply Linux-specific settings to the requested target
+# @param    target Target name
+function(platform_configure_target target)
+    if("${target}" STREQUAL "cppcommon-tests" OR "${target}" STREQUAL "cppcommon-example-system_dll")
+        target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+    endif()
+endfunction()
+
 # @brief    Configure Linux compiler settings
 # @details  Preserve compiler settings supplied by the caller. Platform-specific
 #               compiler options can be added here when required
