@@ -8,7 +8,7 @@ project(cppcommon)
 #
 # Project options
 #
-option(BUILD_TESTING                       "Build unit and integration tests"          OFF)
+option(CPPCOMMON_ENABLE_TESTING            "Enable testing support"                    OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
 option(CPPCOMMON_BUILD_BENCHMARKS          "Build performance benchmarks"              OFF)
 option(CPPCOMMON_BUILD_PLUGINS             "Build plugins"                             OFF)
@@ -31,11 +31,17 @@ else()
 endif()
 
 #
-# Compiler features setup
+# Tests setup
 #
 
-# TODO Move to the cmake/codeCoverage.cmake
-include(CodeCoverage)
+if(CPPCOMMON_ENABLE_TESTING)
+    enable_testing()
+    include(tests/CMakeLists.txt)
+endif()
+
+#
+# Compiler features setup
+#
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -70,14 +76,30 @@ set(PLATFORM_LINK_OPTIONS)
 
 platform_configure_compiler()
 
+set(TESTS_COMPILE_DEFINITIONS)
+set(TESTS_COMPILE_OPTIONS)
+set(TESTS_LINK_OPTIONS)
+
+tests_configure_compiler()
+
 add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
     ${COMMON_CXX_COMPILE_OPTIONS}
     ${PEDANTIC_COMPILE_OPTIONS}
     ${PLATFORM_COMPILE_OPTIONS}
+    ${TESTS_COMPILE_OPTIONS}
 )
-add_compile_definitions(${PLATFORM_COMPILE_DEFINITIONS})
-add_link_options(${COMMON_LINK_OPTIONS} ${PLATFORM_LINK_OPTIONS})
+
+add_compile_definitions(
+    ${PLATFORM_COMPILE_DEFINITIONS}
+    ${TESTS_COMPILE_DEFINITIONS}
+)
+
+add_link_options(
+    ${COMMON_LINK_OPTIONS} 
+    ${PLATFORM_LINK_OPTIONS}
+    ${TESTS_LINK_OPTIONS}
+)
 
 message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
 
@@ -89,6 +111,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 platform_find_libraries()
+tests_find_libraries()
 
 #
 # Library target
@@ -119,16 +142,14 @@ target_link_libraries(cppcommon
 platform_configure_target(cppcommon)
 platform_link_libraries(cppcommon)
 
+tests_configure_target(cppcommon)
+tests_link_libraries(cppcommon)
+
 #
 # TODO Additional targets
 #
 if(CPPCOMMON_BUILD_PLUGINS)
     include(plugins/CMakeLists.txt)
-endif()
-
-if(BUILD_TESTING)
-    include(CTest)
-    include(tests/CMakeLists.txt)
 endif()
 
 if(CPPCOMMON_BUILD_EXAMPLES)
@@ -164,6 +185,12 @@ endif()
 #
 
 #TODO
+
+#
+# Tests rules configuration
+#
+
+tests_create_rules()
 
 #
 # TODO Documentation rule configuration
