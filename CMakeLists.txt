@@ -84,10 +84,7 @@ message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VER
 #
 # Libraries setup
 #
-# TODO Legacy. Remove
-add_subdirectory("modules")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/modules")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+# TODO Move module dependencies into their corresponding CMake files
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -122,13 +119,6 @@ target_link_libraries(cppcommon
 
 platform_configure_target(cppcommon)
 platform_link_libraries(cppcommon)
-
-# TODO VLD is only for windows so we have to move it to windows.cmake
-if(CPPCOMMON_ENABLE_VLD)
-    target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
-    target_link_libraries(     cppcommon PRIVATE VLD::VLD)
-    target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
-endif()
 
 
 # TODO Something
