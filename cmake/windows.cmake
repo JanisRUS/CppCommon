@@ -48,7 +48,7 @@ endfunction()
 # @details  Apply Windows-specific settings to the requested target
 # @param    target Target name
 function(platform_configure_target target)
-    if(CPPCOMMON_ENABLE_VLD)
+    if("${target}" STREQUAL "cppcommon" AND CPPCOMMON_ENABLE_VLD)
         target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
         target_link_libraries(     cppcommon PRIVATE VLD::VLD)
         target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
