@@ -34,10 +34,7 @@ endif()
 # Tests setup
 #
 
-if(CPPCOMMON_ENABLE_TESTING)
-    enable_testing()
-    include(tests/CMakeLists.txt)
-endif()
+include(cmake/tests.cmake)
 
 #
 # Compiler features setup
@@ -144,6 +141,7 @@ platform_link_libraries(cppcommon)
 
 tests_configure_target(cppcommon)
 tests_link_libraries(cppcommon)
+tests_create_target()
 
 #
 # TODO Additional targets
