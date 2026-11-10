@@ -44,6 +44,21 @@ function(platform_find_libraries)
     set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
 endfunction()
 
+# @brief    Configure target-specific Windows settings
+# @details  Apply Windows-specific settings to the requested target
+# @param    target Target name
+function(platform_configure_target target)
+    if(CPPCOMMON_ENABLE_VLD)
+        target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
+        target_link_libraries(     cppcommon PRIVATE VLD::VLD)
+        target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
+    endif()
+
+    if("${target}" STREQUAL "cppcommon-tests" OR "${target}" STREQUAL "cppcommon-example-system_dll")
+        target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+    endif()
+endfunction()
+
 # @brief    Configure Windows compiler settings
 # @details  Preserve caller-provided compiler settings and enable VLD support
 #               only when the optional Visual Leak Detector components are available
