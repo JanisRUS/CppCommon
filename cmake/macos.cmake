@@ -12,15 +12,6 @@ function(platform_find_libraries)
     set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
 endfunction()
 
-# @brief    Configure target-specific macOS settings
-# @details  Apply macOS-specific settings to the requested target
-# @param    target Target name
-function(platform_configure_target target)
-    if("${target}" STREQUAL "cppcommon-tests" OR "${target}" STREQUAL "cppcommon-example-system_dll")
-        target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
-    endif()
-endfunction()
-
 # @brief    Configure macOS compiler settings
 # @details  Preserve compiler settings supplied by the caller. Platform-specific
 #               compiler options can be added here when required
@@ -39,6 +30,16 @@ function(platform_configure_compiler)
     set(PLATFORM_COMPILE_DEFINITIONS "${_platform_compile_definitions}" PARENT_SCOPE)
     set(PLATFORM_COMPILE_OPTIONS     "${_platform_compile_options}"     PARENT_SCOPE)
     set(PLATFORM_LINK_OPTIONS        "${_platform_link_options}"        PARENT_SCOPE)
+endfunction()
+
+# @brief    Configure target-specific macOS settings
+# @details  Apply macOS-specific settings to the requested target
+# @param    target Target name
+function(platform_configure_target target)
+    if("${target}" STREQUAL "cppcommon-tests"              OR 
+       "${target}" STREQUAL "cppcommon-example-system_dll")
+        target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+    endif()
 endfunction()
 
 # @brief      Configure macOS installation rules

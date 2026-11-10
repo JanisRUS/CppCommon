@@ -84,7 +84,6 @@ message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VER
 #
 # Libraries setup
 #
-# TODO Move module dependencies into their corresponding CMake files
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -119,11 +118,6 @@ target_link_libraries(cppcommon
 
 platform_configure_target(cppcommon)
 platform_link_libraries(cppcommon)
-
-
-# TODO Something
-list(APPEND INSTALL_TARGETS cppcommon)
-set(LINKLIBS cppcommon)
 
 #
 # TODO Additional targets
