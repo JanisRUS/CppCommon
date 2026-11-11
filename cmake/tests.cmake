@@ -1,25 +1,29 @@
-#
-# Tests configuration
-#
-
-# @brief    Configure compiler settings for tests
-# @details  Preserve the caller's test-specific compiler settings
-function(tests_configure_compiler)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
-    endif()
-
-    # No additional test-specific compiler settings are required yet
-endfunction()
-
 # @brief    Find libraries required by tests
-# @details  Discover test dependencies when testing is enabled
+# @details  Discover libraries required by tests and append their link dependencies
+#               to the tests configuration variables
+# @note     Output variables:
+#           - TESTS_LIBS
+#           - TESTS_INCLUDE_DIRS
 function(tests_find_libraries)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
 
     # Test dependency discovery will be configured separately
+endfunction()
+
+# @brief    Configure tests compiler settings
+# @details  Writes tests compiler settings to the tests configurations variables
+# @note     Output variables:
+#           - TESTS_COMPILE_DEFINITIONS
+#           - TESTS_COMPILE_OPTIONS
+#           - TESTS_LINK_OPTIONS
+function(tests_configure_compiler)
+    if(NOT CPPCOMMON_ENABLE_TESTING)
+        return()
+    endif()
+
+    # No additional test-specific compiler settings are required yet
 endfunction()
 
 # @brief    Configure a target for testing
@@ -31,61 +35,6 @@ function(tests_configure_target target)
     endif()
 
     # No target-specific test instrumentation is configured yet
-endfunction()
-
-# @brief    Link test-related libraries to a target
-# @details  Apply test-related link dependencies to the requested target
-# @param    target Target name
-function(tests_link_libraries target)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
-    endif()
-
-    # No additional libraries are linked to the core target
-endfunction()
-
-# @brief    Create the test executable
-# @details  Add the test sources and configure the test target
-function(tests_create_target)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
-    endif()
-
-    file(GLOB TESTS_HEADER_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
-    )
-    file(GLOB TESTS_INLINE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
-    )
-    file(GLOB TESTS_SOURCE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
-    )
-
-    add_executable(cppcommon-tests
-        ${TESTS_HEADER_FILES}
-        ${TESTS_INLINE_FILES}
-        ${TESTS_SOURCE_FILES}
-    )
-
-    platform_configure_target(cppcommon-tests)
-
-    if(PLUGINS)
-        add_dependencies(cppcommon-tests ${PLUGINS})
-    endif()
-
-    set_target_properties(cppcommon-tests PROPERTIES
-        COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}"
-        FOLDER "tests"
-    )
-
-    target_include_directories(cppcommon-tests PRIVATE Catch2)
-    target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
-
-    list(APPEND INSTALL_TARGETS cppcommon-tests)
-    list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
-
-    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-    set(INSTALL_TARGETS_PDB "${INSTALL_TARGETS_PDB}" PARENT_SCOPE)
 endfunction()
 
 # @brief    Create test-related CMake rules
@@ -100,3 +49,43 @@ function(tests_create_rules)
         COMMAND cppcommon-tests --durations yes --order lex
     )
 endfunction()
+
+if(NOT CPPCOMMON_ENABLE_TESTING)
+    return()
+endif()
+
+file(GLOB TESTS_HEADER_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
+)
+file(GLOB TESTS_INLINE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
+)
+file(GLOB TESTS_SOURCE_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
+)
+
+add_executable(cppcommon-tests
+    ${TESTS_HEADER_FILES}
+    ${TESTS_INLINE_FILES}
+    ${TESTS_SOURCE_FILES}
+)
+
+platform_configure_target(cppcommon-tests)
+
+if(PLUGINS)
+    add_dependencies(cppcommon-tests ${PLUGINS})
+endif()
+
+set_target_properties(cppcommon-tests PROPERTIES
+    COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}"
+    FOLDER "tests"
+)
+
+target_include_directories(cppcommon-tests PRIVATE Catch2)
+target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
+
+list(APPEND INSTALL_TARGETS cppcommon-tests)
+list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
+
+set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
+set(INSTALL_TARGETS_PDB "${INSTALL_TARGETS_PDB}" PARENT_SCOPE)
