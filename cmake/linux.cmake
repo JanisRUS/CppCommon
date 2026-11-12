@@ -1,7 +1,3 @@
-set(PLATFORM_COMPILE_DEFINITIONS)
-set(PLATFORM_COMPILE_OPTIONS)
-set(PLATFORM_LINK_OPTIONS)
-
 # @brief    Find Linux system libraries
 # @details  Discover optional Linux libraries and append their link dependencies
 #               to the platform configuration variables
@@ -9,21 +5,21 @@ set(PLATFORM_LINK_OPTIONS)
 #           - PLATFORM_LIBS
 #           - PLATFORM_INCLUDE_DIRS
 function(platform_get_libraries)
-    set(_platform_libs         ${PLATFORM_LIBS})
-    set(_platform_include_dirs ${PLATFORM_INCLUDE_DIRS})
+    set(PLATFORM_LIBS)
+    set(PLATFORM_INCLUDE_DIRS)
 
     find_package(LibBFD)
     find_package(LibDL)
     find_package(LibRT)
     find_package(LibUUID)
 
-    list(APPEND _platform_libs ${LIBBFD_LIBRARIES})
-    list(APPEND _platform_libs ${LIBDL_LIBRARIES})
-    list(APPEND _platform_libs ${LIBRT_LIBRARIES})
-    list(APPEND _platform_libs ${LIBUUID_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${LIBBFD_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${LIBDL_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${LIBRT_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${LIBUUID_LIBRARIES})
 
-    set(PLATFORM_LIBS         "${_platform_libs}"         PARENT_SCOPE)
-    set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
+    set(PLATFORM_LIBS         "${PLATFORM_LIBS}"         PARENT_SCOPE)
+    set(PLATFORM_INCLUDE_DIRS "${PLATFORM_INCLUDE_DIRS}" PARENT_SCOPE)
 endfunction()
 
 # @brief    Link Linux system libraries to a target
@@ -31,22 +27,22 @@ endfunction()
 # @param    target Target name
 
 # @brief    Configure Linux compiler settings
-# @details  Preserve compiler settings supplied by the caller. Platform-specific
+# @details  Initialize platform compiler settings. Platform-specific
 #               compiler options can be added here when required
 # @note     Output variables: 
 #           - PLATFORM_COMPILE_DEFINITIONS
 #           - PLATFORM_COMPILE_OPTIONS
 #           - PLATFORM_LINK_OPTIONS
 function(platform_get_compiler_settings)
-    set(_platform_compile_definitions ${PLATFORM_COMPILE_DEFINITIONS})
-    set(_platform_compile_options     ${PLATFORM_COMPILE_OPTIONS})
-    set(_platform_link_options        ${PLATFORM_LINK_OPTIONS})
+    set(PLATFORM_COMPILE_DEFINITIONS)
+    set(PLATFORM_COMPILE_OPTIONS)
+    set(PLATFORM_LINK_OPTIONS)
 
     # No additional Linux-specific compiler settings are required
 
-    set(PLATFORM_COMPILE_DEFINITIONS "${_platform_compile_definitions}" PARENT_SCOPE)
-    set(PLATFORM_COMPILE_OPTIONS     "${_platform_compile_options}"     PARENT_SCOPE)
-    set(PLATFORM_LINK_OPTIONS        "${_platform_link_options}"        PARENT_SCOPE)
+    set(PLATFORM_COMPILE_DEFINITIONS "${PLATFORM_COMPILE_DEFINITIONS}" PARENT_SCOPE)
+    set(PLATFORM_COMPILE_OPTIONS     "${PLATFORM_COMPILE_OPTIONS}"     PARENT_SCOPE)
+    set(PLATFORM_LINK_OPTIONS        "${PLATFORM_LINK_OPTIONS}"        PARENT_SCOPE)
 endfunction()
 
 # @brief    Configure target-specific Linux settings

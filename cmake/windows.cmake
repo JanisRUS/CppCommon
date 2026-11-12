@@ -1,7 +1,3 @@
-set(PLATFORM_COMPILE_DEFINITIONS)
-set(PLATFORM_COMPILE_OPTIONS)
-set(PLATFORM_LINK_OPTIONS)
-
 # @brief    Find Windows system and optional libraries
 # @details  Discover Windows system libraries and optionally enable Visual Leak
 #               Detector when both its header and library are available
@@ -9,16 +5,16 @@ set(PLATFORM_LINK_OPTIONS)
 #           - PLATFORM_LIBS
 #           - PLATFORM_INCLUDE_DIRS
 function(platform_get_libraries)
-    set(_platform_libs         ${PLATFORM_LIBS})
-    set(_platform_include_dirs ${PLATFORM_INCLUDE_DIRS})
+    set(PLATFORM_LIBS)
+    set(PLATFORM_INCLUDE_DIRS)
 
     find_package(DbgHelp)
     find_package(RPC)
     find_package(Userenv)
 
-    list(APPEND _platform_libs ${DBGHELP_LIBRARIES})
-    list(APPEND _platform_libs ${RPC_LIBRARIES})
-    list(APPEND _platform_libs ${USERENV_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${DBGHELP_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${RPC_LIBRARIES})
+    list(APPEND PLATFORM_LIBS ${USERENV_LIBRARIES})
 
     # Visual Leak Detector is optional
     find_path(VLD_INCLUDE_DIR
@@ -40,63 +36,63 @@ function(platform_get_libraries)
             )
         endif()
 
-        list(APPEND _platform_libs VLD::VLD)
-        list(APPEND _platform_include_dirs "${VLD_INCLUDE_DIR}")
+        list(APPEND PLATFORM_LIBS VLD::VLD)
+        list(APPEND PLATFORM_INCLUDE_DIRS "${VLD_INCLUDE_DIR}")
     endif()
 
-    set(PLATFORM_LIBS         "${_platform_libs}"         PARENT_SCOPE)
-    set(PLATFORM_INCLUDE_DIRS "${_platform_include_dirs}" PARENT_SCOPE)
+    set(PLATFORM_LIBS         "${PLATFORM_LIBS}"         PARENT_SCOPE)
+    set(PLATFORM_INCLUDE_DIRS "${PLATFORM_INCLUDE_DIRS}" PARENT_SCOPE)
 endfunction()
 
 # @brief    Configure Windows compiler settings
-# @details  Preserve caller-provided compiler settings and enable VLD support
+# @details  Initialize Windows compiler settings and enable VLD support
 #               only when the optional Visual Leak Detector components are available
 # @note     Output variables:
 #           - PLATFORM_COMPILE_DEFINITIONS
 #           - PLATFORM_COMPILE_OPTIONS
 #           - PLATFORM_LINK_OPTIONS
 function(platform_get_compiler_settings)
-    set(_platform_compile_definitions ${PLATFORM_COMPILE_DEFINITIONS})
-    set(_platform_compile_options     ${PLATFORM_COMPILE_OPTIONS})
-    set(_platform_link_options        ${PLATFORM_LINK_OPTIONS})
+    set(PLATFORM_COMPILE_DEFINITIONS)
+    set(PLATFORM_COMPILE_OPTIONS)
+    set(PLATFORM_LINK_OPTIONS)
 
     if(VLD_INCLUDE_DIR AND VLD_LIBRARY)
-        list(APPEND _platform_compile_definitions VLD_SUPPORT)
+        list(APPEND PLATFORM_COMPILE_DEFINITIONS VLD_SUPPORT)
     endif()
 
     # Configure MinGW-w64 compiler options
     if(MINGW)
         # Increase the number of sections that an object file can contain
-        list(APPEND _platform_compile_options -Wa,-mbig-obj)
+        list(APPEND PLATFORM_COMPILE_OPTIONS -Wa,-mbig-obj)
 
         # Link the GCC and C++ standard libraries statically
-        list(APPEND _platform_link_options -static-libgcc -static-libstdc++)
+        list(APPEND PLATFORM_LINK_OPTIONS -static-libgcc -static-libstdc++)
     endif()
 
     # Configure Visual Studio compiler options
     if(MSVC)
         # Increase the number of sections that an object file can contain
-        list(APPEND _platform_compile_options /bigobj)
+        list(APPEND PLATFORM_COMPILE_OPTIONS /bigobj)
 
         # Use UTF-8 for source and execution character sets
-        list(APPEND _platform_compile_options /utf-8)
+        list(APPEND PLATFORM_COMPILE_OPTIONS /utf-8)
 
         # Report the correct value of __cplusplus
-        list(APPEND _platform_compile_options /Zc:__cplusplus)
+        list(APPEND PLATFORM_COMPILE_OPTIONS /Zc:__cplusplus)
 
         # Configure compiler warnings
-        list(APPEND _platform_compile_options /W4 /WX /wd4100 /wd4250)
+        list(APPEND PLATFORM_COMPILE_OPTIONS /W4 /WX /wd4100 /wd4250)
     endif()
 
     # Configure Windows platform definitions
     if(CYGWIN)
-        list(APPEND _platform_compile_definitions
+        list(APPEND PLATFORM_COMPILE_DEFINITIONS
             WIN32
             WIN32_LEAN_AND_MEAN
             _WIN32_WINNT=0x0A00
         )
     elseif(WIN32)
-        list(APPEND _platform_compile_definitions
+        list(APPEND PLATFORM_COMPILE_DEFINITIONS
             WIN32
             WIN32_LEAN_AND_MEAN
             _CRT_SECURE_NO_DEPRECATE
@@ -122,15 +118,15 @@ function(platform_get_compiler_settings)
         endif()
 
         if(_windows_sdk_version)
-            list(APPEND _platform_compile_definitions
+            list(APPEND PLATFORM_COMPILE_DEFINITIONS
                 _WIN32_SDK=${_windows_sdk_version}
             )
         endif()
     endif()
 
-    set(PLATFORM_COMPILE_DEFINITIONS "${_platform_compile_definitions}" PARENT_SCOPE)
-    set(PLATFORM_COMPILE_OPTIONS     "${_platform_compile_options}"     PARENT_SCOPE)
-    set(PLATFORM_LINK_OPTIONS        "${_platform_link_options}"        PARENT_SCOPE)
+    set(PLATFORM_COMPILE_DEFINITIONS "${PLATFORM_COMPILE_DEFINITIONS}" PARENT_SCOPE)
+    set(PLATFORM_COMPILE_OPTIONS     "${PLATFORM_COMPILE_OPTIONS}"     PARENT_SCOPE)
+    set(PLATFORM_LINK_OPTIONS        "${PLATFORM_LINK_OPTIONS}"        PARENT_SCOPE)
 endfunction()
 
 # @brief    Configure target-specific Windows settings

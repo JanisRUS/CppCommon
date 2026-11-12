@@ -1,15 +1,18 @@
-set(TESTS_COMPILE_DEFINITIONS)
-set(TESTS_COMPILE_OPTIONS)
-set(TESTS_LINK_OPTIONS)
-
 # @brief    Find libraries required by tests
 # @details  Discover libraries required by tests
+# @note     Output variables:
+#           - TESTS_LIBS
+#           - TESTS_INCLUDE_DIRS
 function(tests_get_libraries)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
+    set(TESTS_LIBS)
+    set(TESTS_INCLUDE_DIRS)
+
+    if(CPPCOMMON_ENABLE_TESTING)
+        find_package(Catch2 3 CONFIG REQUIRED)
     endif()
 
-    find_package(Catch2 3 CONFIG REQUIRED)
+    set(TESTS_LIBS         "${TESTS_LIBS}"         PARENT_SCOPE)
+    set(TESTS_INCLUDE_DIRS "${TESTS_INCLUDE_DIRS}" PARENT_SCOPE)
 endfunction()
 
 # @brief    Configure tests compiler settings
@@ -19,11 +22,15 @@ endfunction()
 #           - TESTS_COMPILE_OPTIONS
 #           - TESTS_LINK_OPTIONS
 function(tests_get_compiler_settings)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
-    endif()
+    set(TESTS_COMPILE_DEFINITIONS)
+    set(TESTS_COMPILE_OPTIONS)
+    set(TESTS_LINK_OPTIONS)
 
     # No additional test-specific compiler settings are required yet
+
+    set(TESTS_COMPILE_DEFINITIONS "${TESTS_COMPILE_DEFINITIONS}" PARENT_SCOPE)
+    set(TESTS_COMPILE_OPTIONS     "${TESTS_COMPILE_OPTIONS}"     PARENT_SCOPE)
+    set(TESTS_LINK_OPTIONS        "${TESTS_LINK_OPTIONS}"        PARENT_SCOPE)
 endfunction()
 
 # @brief    Configure a target for testing
