@@ -1,3 +1,7 @@
+set(PLATFORM_COMPILE_DEFINITIONS)
+set(PLATFORM_COMPILE_OPTIONS)
+set(PLATFORM_LINK_OPTIONS)
+
 # @brief    Find Windows system and optional libraries
 # @details  Discover Windows system libraries and optionally enable Visual Leak
 #               Detector when both its header and library are available
