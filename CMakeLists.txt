@@ -71,7 +71,7 @@ set(PLATFORM_COMPILE_DEFINITIONS)
 set(PLATFORM_COMPILE_OPTIONS)
 set(PLATFORM_LINK_OPTIONS)
 
-platform_configure_compiler()
+platform_get_compiler_settings()
 
 set(TESTS_COMPILE_DEFINITIONS)
 set(TESTS_COMPILE_OPTIONS)
@@ -107,7 +107,7 @@ message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VER
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-platform_find_libraries()
+platform_get_libraries()
 tests_get_libraries()
 
 #
@@ -136,8 +136,7 @@ target_link_libraries(cppcommon
         fmt
 )
 
-platform_configure_target(cppcommon)
-platform_link_libraries(cppcommon)
+platform_setup_target(cppcommon)
 
 tests_setup_target(cppcommon)
 
@@ -160,13 +159,17 @@ endif()
 # Install and uninstall setup
 #
 
+platform_setup_install()
 tests_setup_install()
+
+platform_setup_uninstall()
 tests_setup_uninstall()
 
 #
 # Additional targets and rules
 #
 
+platform_create_targets()
 tests_create_targets()
 
 #
