@@ -1,3 +1,7 @@
+set(PLATFORM_COMPILE_DEFINITIONS)
+set(PLATFORM_COMPILE_OPTIONS)
+set(PLATFORM_LINK_OPTIONS)
+
 # @brief    Find Linux system libraries
 # @details  Discover optional Linux libraries and append their link dependencies
 #               to the platform configuration variables
