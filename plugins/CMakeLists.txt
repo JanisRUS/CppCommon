@@ -1,5 +1,17 @@
 # Build the shared libraries used by the DLL tests and example.
-foreach(PLUGIN_NAME IN ITEMS function interface)
+file(GLOB PLUGIN_DIRECTORIES
+    LIST_DIRECTORIES true
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*"
+)
+
+set(CPPCOMMON_PLUGIN_TARGETS)
+
+foreach(PLUGIN_NAME IN LISTS PLUGIN_DIRECTORIES)
+    if(NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}")
+        continue()
+    endif()
+
     file(GLOB PLUGIN_HEADER_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}/*.h"
     )
@@ -29,4 +41,10 @@ foreach(PLUGIN_NAME IN ITEMS function interface)
     set_target_properties(${PLUGIN_TARGET} PROPERTIES
         FOLDER "plugins"
     )
+
+    list(APPEND CPPCOMMON_PLUGIN_TARGETS ${PLUGIN_TARGET})
 endforeach()
+
+set_property(GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS
+    "${CPPCOMMON_PLUGIN_TARGETS}"
+)
