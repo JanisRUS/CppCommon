@@ -1,15 +1,11 @@
 # @brief    Find libraries required by tests
-# @details  Discover libraries required by tests and append their link dependencies
-#               to the tests configuration variables
-# @note     Output variables:
-#           - TESTS_LIBS
-#           - TESTS_INCLUDE_DIRS
+# @details  Discover libraries required by tests
 function(tests_get_libraries)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
 
-    # Test dependency discovery will be configured separately
+    find_package(Catch2 3 CONFIG REQUIRED)
 endfunction()
 
 # @brief    Configure tests compiler settings
@@ -93,8 +89,7 @@ function(tests_create_targets)
         FOLDER "tests"
     )
 
-    target_include_directories(cppcommon-tests PRIVATE Catch2)
-    target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
+    target_link_libraries(cppcommon-tests PRIVATE Catch2::Catch2WithMain)
 
     enable_testing()
     add_test(NAME cppcommon-tests
