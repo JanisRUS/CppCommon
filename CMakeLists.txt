@@ -77,7 +77,7 @@ set(TESTS_COMPILE_DEFINITIONS)
 set(TESTS_COMPILE_OPTIONS)
 set(TESTS_LINK_OPTIONS)
 
-tests_configure_compiler()
+tests_get_compiler_settings()
 
 add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
@@ -93,7 +93,7 @@ add_compile_definitions(
 )
 
 add_link_options(
-    ${COMMON_LINK_OPTIONS} 
+    ${COMMON_LINK_OPTIONS}
     ${PLATFORM_LINK_OPTIONS}
     ${TESTS_LINK_OPTIONS}
 )
@@ -108,7 +108,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 platform_find_libraries()
-tests_find_libraries()
+tests_get_libraries()
 
 #
 # Library target
@@ -139,9 +139,7 @@ target_link_libraries(cppcommon
 platform_configure_target(cppcommon)
 platform_link_libraries(cppcommon)
 
-tests_configure_target(cppcommon)
-tests_link_libraries(cppcommon)
-tests_create_target()
+tests_setup_target(cppcommon)
 
 #
 # TODO Additional targets
@@ -157,6 +155,19 @@ endif()
 if(CPPCOMMON_BUILD_BENCHMARKS)
     include(performance/CMakeLists.txt)
 endif()
+
+#
+# Install and uninstall setup
+#
+
+tests_setup_install()
+tests_setup_uninstall()
+
+#
+# Additional targets and rules
+#
+
+tests_create_targets()
 
 #
 # TODO Install rule configuration
@@ -177,18 +188,6 @@ if(NOT CPPCOMMON_MODULE)
   endif()
 
 endif()
-
-#
-# TODO Uninstall rule configuration
-#
-
-#TODO
-
-#
-# Tests rules configuration
-#
-
-tests_create_rules()
 
 #
 # TODO Documentation rule configuration
