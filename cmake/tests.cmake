@@ -1,3 +1,7 @@
+set(TESTS_COMPILE_DEFINITIONS)
+set(TESTS_COMPILE_OPTIONS)
+set(TESTS_LINK_OPTIONS)
+
 # @brief    Find libraries required by tests
 # @details  Discover libraries required by tests
 function(tests_get_libraries)
