@@ -67,15 +67,7 @@ if(NOT MSVC)
     endif()
 endif()
 
-set(PLATFORM_COMPILE_DEFINITIONS)
-set(PLATFORM_COMPILE_OPTIONS)
-set(PLATFORM_LINK_OPTIONS)
-
 platform_get_compiler_settings()
-
-set(TESTS_COMPILE_DEFINITIONS)
-set(TESTS_COMPILE_OPTIONS)
-set(TESTS_LINK_OPTIONS)
 
 tests_get_compiler_settings()
 
