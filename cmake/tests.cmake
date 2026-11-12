@@ -4,7 +4,7 @@
 # @note     Output variables:
 #           - TESTS_LIBS
 #           - TESTS_INCLUDE_DIRS
-function(tests_find_libraries)
+function(tests_get_libraries)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
@@ -18,7 +18,7 @@ endfunction()
 #           - TESTS_COMPILE_DEFINITIONS
 #           - TESTS_COMPILE_OPTIONS
 #           - TESTS_LINK_OPTIONS
-function(tests_configure_compiler)
+function(tests_get_compiler_settings)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
@@ -29,7 +29,7 @@ endfunction()
 # @brief    Configure a target for testing
 # @details  Apply test-related settings to the requested target
 # @param    target Target name
-function(tests_configure_target target)
+function(tests_setup_target target)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
@@ -37,55 +37,67 @@ function(tests_configure_target target)
     # No target-specific test instrumentation is configured yet
 endfunction()
 
-# @brief    Create test-related CMake rules
-# @details  Enable CTest and register the test executable
-function(tests_create_rules)
+# @brief      Configure test installation rules
+# @details    Add test targets to the project installation target lists
+function(tests_setup_install)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
+
+    list(APPEND INSTALL_TARGETS cppcommon-tests)
+    list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
+
+    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
+    set(INSTALL_TARGETS_PDB "${INSTALL_TARGETS_PDB}" PARENT_SCOPE)
+endfunction()
+
+# @brief      Configure test uninstallation rules
+# @details    Provide the test uninstallation hook
+function(tests_setup_uninstall)
+    if(NOT CPPCOMMON_ENABLE_TESTING)
+        return()
+    endif()
+endfunction()
+
+# @brief    Create test-related targets and rules
+# @details  Create the test executable, enable CTest and register the test
+function(tests_create_targets)
+    if(NOT CPPCOMMON_ENABLE_TESTING)
+        return()
+    endif()
+
+    file(GLOB TESTS_HEADER_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
+    )
+    file(GLOB TESTS_INLINE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
+    )
+    file(GLOB TESTS_SOURCE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
+    )
+
+    add_executable(cppcommon-tests
+        ${TESTS_HEADER_FILES}
+        ${TESTS_INLINE_FILES}
+        ${TESTS_SOURCE_FILES}
+    )
+
+    platform_configure_target(cppcommon-tests)
+
+    if(PLUGINS)
+        add_dependencies(cppcommon-tests ${PLUGINS})
+    endif()
+
+    set_target_properties(cppcommon-tests PROPERTIES
+        COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}"
+        FOLDER "tests"
+    )
+
+    target_include_directories(cppcommon-tests PRIVATE Catch2)
+    target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
 
     enable_testing()
     add_test(NAME cppcommon-tests
         COMMAND cppcommon-tests --durations yes --order lex
     )
 endfunction()
-
-if(NOT CPPCOMMON_ENABLE_TESTING)
-    return()
-endif()
-
-file(GLOB TESTS_HEADER_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
-)
-file(GLOB TESTS_INLINE_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
-)
-file(GLOB TESTS_SOURCE_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
-)
-
-add_executable(cppcommon-tests
-    ${TESTS_HEADER_FILES}
-    ${TESTS_INLINE_FILES}
-    ${TESTS_SOURCE_FILES}
-)
-
-platform_configure_target(cppcommon-tests)
-
-if(PLUGINS)
-    add_dependencies(cppcommon-tests ${PLUGINS})
-endif()
-
-set_target_properties(cppcommon-tests PROPERTIES
-    COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}"
-    FOLDER "tests"
-)
-
-target_include_directories(cppcommon-tests PRIVATE Catch2)
-target_link_libraries(cppcommon-tests ${LINKLIBS} Catch2)
-
-list(APPEND INSTALL_TARGETS cppcommon-tests)
-list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
-
-set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-set(INSTALL_TARGETS_PDB "${INSTALL_TARGETS_PDB}" PARENT_SCOPE)
