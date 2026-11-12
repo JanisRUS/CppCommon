@@ -20,18 +20,22 @@ function(examples_create_targets)
         set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
 
         if(EXAMPLE_NAME STREQUAL "system_dll")
-            if(NOT TARGET plugin-function AND NOT TARGET plugin-interface)
+            get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+
+            if(NOT PLUGIN_TARGETS)
                 add_subdirectory(
                     "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
                     "${CMAKE_CURRENT_BINARY_DIR}/plugins"
                 )
+
+                get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
             endif()
 
-            if(NOT TARGET plugin-function OR NOT TARGET plugin-interface)
-                message(FATAL_ERROR "CppCommon plugin fixtures were not created")
+            if(NOT PLUGIN_TARGETS)
+                message(FATAL_ERROR "CppCommon plugin targets were not created")
             endif()
 
-            set_target_properties(plugin-function plugin-interface PROPERTIES
+            set_target_properties(${PLUGIN_TARGETS} PROPERTIES
                 LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
             )
@@ -50,10 +54,7 @@ function(examples_create_targets)
         )
 
         if(EXAMPLE_NAME STREQUAL "system_dll")
-            add_dependencies(${EXAMPLE_TARGET}
-                plugin-function
-                plugin-interface
-            )
+            add_dependencies(${EXAMPLE_TARGET} ${PLUGIN_TARGETS})
         endif()
 
         set_target_properties(${EXAMPLE_TARGET} PROPERTIES
