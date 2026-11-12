@@ -1,3 +1,7 @@
+set(PLATFORM_COMPILE_DEFINITIONS)
+set(PLATFORM_COMPILE_OPTIONS)
+set(PLATFORM_LINK_OPTIONS)
+
 # @brief    Find macOS system libraries
 # @details  Provide the macOS library discovery hook. No additional platform
 #               libraries are required at this stage
