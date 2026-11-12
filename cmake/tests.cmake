@@ -73,6 +73,17 @@ function(tests_create_targets)
         return()
     endif()
 
+    if(NOT TARGET plugin-function)
+        add_subdirectory(
+            "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
+            "${CMAKE_CURRENT_BINARY_DIR}/plugins"
+        )
+    endif()
+
+    if(NOT TARGET plugin-function OR NOT TARGET plugin-interface)
+        message(FATAL_ERROR "CppCommon plugin fixtures were not created")
+    endif()
+
     file(GLOB TESTS_HEADER_FILES
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
     )
@@ -91,9 +102,10 @@ function(tests_create_targets)
 
     platform_configure_target(cppcommon-tests)
 
-    if(PLUGINS)
-        add_dependencies(cppcommon-tests ${PLUGINS})
-    endif()
+    add_dependencies(cppcommon-tests
+        plugin-function
+        plugin-interface
+    )
 
     set_target_properties(cppcommon-tests PROPERTIES
         COMPILE_FLAGS "${PEDANTIC_COMPILE_FLAGS}"
