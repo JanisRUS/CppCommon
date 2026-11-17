@@ -1,17 +1,22 @@
-# Initialize the performance module.
+# @brief    Initialize the performance module
+# @details  Creates settings provided by module
+# @note     Settings are empty now
 function(performance_init)
     add_library(cppcommon_performance_global_settings INTERFACE)
     add_library(cppcommon_performance_target_settings INTERFACE)
 endfunction()
 
-# Configure performance module settings.
+# @brief    Configure performance module settings
+# @details  Configures settings provided by module
+# @note     Empty now
 function(performance_configure_settings)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
     endif()
 endfunction()
 
-# Create performance benchmark targets.
+# @brief    Create performance module targets
+# @details  Creates module targets
 function(performance_create_targets)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
@@ -22,6 +27,17 @@ function(performance_create_targets)
     file(GLOB _performance_header_files "${_performance_directory}/*.h")
     file(GLOB _performance_inline_files "${_performance_directory}/*.inl")
     file(GLOB _performance_source_files "${_performance_directory}/*.cpp")
+
+    if(NOT PLUGIN_TARGETS)
+        add_subdirectory(
+            "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
+            "${CMAKE_CURRENT_BINARY_DIR}/plugins"
+        )
+
+        if(NOT PLUGIN_TARGETS)
+            message(FATAL_ERROR "CppCommon plugins were not created")
+        endif()
+    endif()
 
     get_property(_performance_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
 
@@ -39,7 +55,9 @@ function(performance_create_targets)
 
         target_link_libraries(${_benchmark_target}
             PRIVATE
+                cppcommon_global_settings
                 cppcommon_performance_global_settings
+                cppcommon_plugins_global_settings
                 cppcommon
                 cppbenchmark
         )
@@ -58,7 +76,8 @@ function(performance_create_targets)
     set(PERFORMANCE_TARGETS "${_performance_targets}" PARENT_SCOPE)
 endfunction()
 
-# Prepare installation data for performance benchmark targets.
+# @brief    Configure install variables
+# @details  Configures install variables for module targets 
 function(performance_install)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
@@ -66,9 +85,9 @@ function(performance_install)
 
     foreach(_performance_target IN LISTS PERFORMANCE_TARGETS)
         list(APPEND INSTALL_TARGETS "${_performance_target}")
-        list(APPEND INSTALL_PATHS "${PROJECT_SOURCE_DIR}/bin")
+        list(APPEND INSTALL_PATHS   "${PROJECT_SOURCE_DIR}/bin")
     endforeach()
 
     set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-    set(INSTALL_PATHS "${INSTALL_PATHS}" PARENT_SCOPE)
+    set(INSTALL_PATHS   "${INSTALL_PATHS}"   PARENT_SCOPE)
 endfunction()
