@@ -28,17 +28,7 @@ function(performance_create_targets)
     file(GLOB _performance_inline_files "${_performance_directory}/*.inl")
     file(GLOB _performance_source_files "${_performance_directory}/*.cpp")
 
-    if(NOT PLUGIN_TARGETS)
-        add_subdirectory(
-            "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
-            "${CMAKE_CURRENT_BINARY_DIR}/plugins"
-        )
-
-        if(NOT PLUGIN_TARGETS)
-            message(FATAL_ERROR "CppCommon plugins were not created")
-        endif()
-    endif()
-
+    plugins_check()
     get_property(_performance_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
 
     set(_performance_targets)
