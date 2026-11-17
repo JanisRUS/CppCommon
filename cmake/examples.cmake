@@ -31,8 +31,8 @@ function(examples_get_compiler_settings)
     set(EXAMPLES_LINK_OPTIONS        "${EXAMPLES_LINK_OPTIONS}"        PARENT_SCOPE)
 endfunction()
 
-# @brief    Configure an example target
-# @details  Apply common and platform-specific settings to an example target
+# @brief    Configure a target for examples
+# @details  Apply examples-module settings to the requested target
 # @param    target Target name
 function(examples_setup_target target)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
@@ -90,14 +90,12 @@ function(examples_create_targets)
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
     )
 
-    set(EXAMPLE_NAMES)
+    list(FIND EXAMPLE_SOURCE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/examples/system_dll.cpp"
+        SYSTEM_DLL_EXAMPLE_INDEX
+    )
 
-    foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
-        get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
-        list(APPEND EXAMPLE_NAMES "${EXAMPLE_NAME}")
-    endforeach()
-
-    if("system_dll" IN_LIST EXAMPLE_NAMES)
+    if(NOT SYSTEM_DLL_EXAMPLE_INDEX EQUAL -1)
         get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
 
         if(NOT PLUGIN_TARGETS)
