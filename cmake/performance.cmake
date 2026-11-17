@@ -23,6 +23,8 @@ function(performance_create_targets)
     file(GLOB _performance_inline_files "${_performance_directory}/*.inl")
     file(GLOB _performance_source_files "${_performance_directory}/*.cpp")
 
+    get_property(_performance_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+
     set(_performance_targets)
 
     foreach(_performance_source_file IN LISTS _performance_source_files)
@@ -41,6 +43,10 @@ function(performance_create_targets)
                 cppcommon
                 cppbenchmark
         )
+
+        if(_performance_plugin_targets)
+            add_dependencies(${_benchmark_target} ${_performance_plugin_targets})
+        endif()
 
         set_target_properties(${_benchmark_target} PROPERTIES
             FOLDER "performance"
