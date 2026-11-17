@@ -136,6 +136,7 @@ target_link_libraries(cppcommon
 platform_setup_target(cppcommon)
 
 tests_setup_target(cppcommon)
+examples_setup_target(cppcommon)
 
 if(CPPCOMMON_BUILD_BENCHMARKS)
     include(performance/CMakeLists.txt)
