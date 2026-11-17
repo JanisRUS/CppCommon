@@ -7,9 +7,7 @@ function(examples_get_libraries)
     set(EXAMPLES_LIBS)
     set(EXAMPLES_INCLUDE_DIRS)
 
-    if(CPPCOMMON_BUILD_EXAMPLES)
-        # Examples currently depend only on cppcommon
-    endif()
+    # Examples currently depend only on cppcommon
 
     set(EXAMPLES_LIBS         "${EXAMPLES_LIBS}"         PARENT_SCOPE)
     set(EXAMPLES_INCLUDE_DIRS "${EXAMPLES_INCLUDE_DIRS}" PARENT_SCOPE)
