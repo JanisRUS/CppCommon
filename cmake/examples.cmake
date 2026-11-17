@@ -39,7 +39,7 @@ function(examples_setup_target target)
         return()
     endif()
 
-    # No example-specific settings are required by the cppcommon target yet
+    # No example-specific settings are required by the target yet
 endfunction()
 
 # @brief      Configure example installation rules
