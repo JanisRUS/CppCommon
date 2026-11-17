@@ -39,23 +39,7 @@ function(examples_setup_target target)
         return()
     endif()
 
-    platform_setup_target(${target})
-
-    if(EXAMPLES_INCLUDE_DIRS)
-        target_include_directories(${target}
-            PRIVATE ${EXAMPLES_INCLUDE_DIRS}
-        )
-    endif()
-
-    target_link_libraries(${target}
-        PRIVATE
-            cppcommon
-            ${EXAMPLES_LIBS}
-    )
-
-    set_target_properties(${target} PROPERTIES
-        FOLDER "examples"
-    )
+    # No example-specific settings are required by the cppcommon target yet
 endfunction()
 
 # @brief      Configure example installation rules
@@ -106,31 +90,38 @@ function(examples_create_targets)
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
     )
 
+    set(EXAMPLE_NAMES)
+
+    foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
+        get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
+        list(APPEND EXAMPLE_NAMES "${EXAMPLE_NAME}")
+    endforeach()
+
+    if("system_dll" IN_LIST EXAMPLE_NAMES)
+        get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+
+        if(NOT PLUGIN_TARGETS)
+            add_subdirectory(
+                "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
+                "${CMAKE_CURRENT_BINARY_DIR}/plugins"
+            )
+
+            get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+        endif()
+
+        if(NOT PLUGIN_TARGETS)
+            message(FATAL_ERROR "CppCommon plugin fixtures were not created")
+        endif()
+
+        set_target_properties(${PLUGIN_TARGETS} PROPERTIES
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        )
+    endif()
+
     foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
         get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
         set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
-
-        if(EXAMPLE_NAME STREQUAL "system_dll")
-            get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
-
-            if(NOT PLUGIN_TARGETS)
-                add_subdirectory(
-                    "${CMAKE_CURRENT_SOURCE_DIR}/plugins"
-                    "${CMAKE_CURRENT_BINARY_DIR}/plugins"
-                )
-
-                get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
-            endif()
-
-            if(NOT PLUGIN_TARGETS)
-                message(FATAL_ERROR "CppCommon plugin fixtures were not created")
-            endif()
-
-            set_target_properties(${PLUGIN_TARGETS} PROPERTIES
-                LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-            )
-        endif()
 
         add_executable(${EXAMPLE_TARGET}
             ${EXAMPLE_HEADER_FILES}
@@ -138,7 +129,23 @@ function(examples_create_targets)
             "${EXAMPLE_SOURCE_FILE}"
         )
 
-        examples_setup_target(${EXAMPLE_TARGET})
+        platform_setup_target(${EXAMPLE_TARGET})
+
+        if(EXAMPLES_INCLUDE_DIRS)
+            target_include_directories(${EXAMPLE_TARGET}
+                PRIVATE ${EXAMPLES_INCLUDE_DIRS}
+            )
+        endif()
+
+        target_link_libraries(${EXAMPLE_TARGET}
+            PRIVATE
+                cppcommon
+                ${EXAMPLES_LIBS}
+        )
+
+        set_target_properties(${EXAMPLE_TARGET} PROPERTIES
+            FOLDER "examples"
+        )
 
         if(EXAMPLE_NAME STREQUAL "system_dll")
             add_dependencies(${EXAMPLE_TARGET} ${PLUGIN_TARGETS})
