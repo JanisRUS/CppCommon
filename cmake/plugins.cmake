@@ -1,7 +1,7 @@
-# @brief    Check is plugins targets exist
-# @details  Checks if CPPCOMMON_PLUGIN_TARGETS exists. 
-#           If not, it adds plugins.
-#           If impossible, throws an error
+# @brief    Check whether plugin targets exist
+# @details  Checks whether CPPCOMMON_PLUGIN_TARGETS is populated.
+#           If not, it adds the plugins subdirectory.
+#           Fails if plugin targets are still unavailable.
 function(plugins_check)
     get_property(_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
 
