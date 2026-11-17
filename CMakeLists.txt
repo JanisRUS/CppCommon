@@ -31,10 +31,11 @@ else()
 endif()
 
 #
-# Tests setup
+# Functional modules
 #
 
 include(cmake/tests.cmake)
+include(cmake/examples.cmake)
 
 #
 # Compiler features setup
@@ -70,6 +71,7 @@ endif()
 platform_get_compiler_settings()
 
 tests_get_compiler_settings()
+examples_get_compiler_settings()
 
 add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
@@ -77,17 +79,20 @@ add_compile_options(
     ${PEDANTIC_COMPILE_OPTIONS}
     ${PLATFORM_COMPILE_OPTIONS}
     ${TESTS_COMPILE_OPTIONS}
+    ${EXAMPLES_COMPILE_OPTIONS}
 )
 
 add_compile_definitions(
     ${PLATFORM_COMPILE_DEFINITIONS}
     ${TESTS_COMPILE_DEFINITIONS}
+    ${EXAMPLES_COMPILE_DEFINITIONS}
 )
 
 add_link_options(
     ${COMMON_LINK_OPTIONS}
     ${PLATFORM_LINK_OPTIONS}
     ${TESTS_LINK_OPTIONS}
+    ${EXAMPLES_LINK_OPTIONS}
 )
 
 message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
@@ -101,6 +106,7 @@ find_package(Threads REQUIRED)
 
 platform_get_libraries()
 tests_get_libraries()
+examples_get_libraries()
 
 #
 # Library target
@@ -133,29 +139,16 @@ platform_setup_target(cppcommon)
 tests_setup_target(cppcommon)
 
 #
-# TODO Additional targets
-#
-if(CPPCOMMON_BUILD_PLUGINS)
-    include(plugins/CMakeLists.txt)
-endif()
-
-if(CPPCOMMON_BUILD_EXAMPLES)
-    include(examples/CMakeLists.txt)
-endif()
-
-if(CPPCOMMON_BUILD_BENCHMARKS)
-    include(performance/CMakeLists.txt)
-endif()
-
-#
 # Install and uninstall setup
 #
 
 platform_setup_install()
 tests_setup_install()
+examples_setup_install()
 
 platform_setup_uninstall()
 tests_setup_uninstall()
+examples_setup_uninstall()
 
 #
 # Additional targets and rules
@@ -163,6 +156,11 @@ tests_setup_uninstall()
 
 platform_create_targets()
 tests_create_targets()
+examples_create_targets()
+
+if(CPPCOMMON_BUILD_BENCHMARKS)
+    include(performance/CMakeLists.txt)
+endif()
 
 #
 # TODO Install rule configuration
