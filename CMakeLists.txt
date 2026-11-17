@@ -33,6 +33,7 @@ endif()
 # Functional modules
 #
 
+include(cmake/plugins.cmake)
 include(cmake/tests.cmake)
 include(cmake/examples.cmake)
 
