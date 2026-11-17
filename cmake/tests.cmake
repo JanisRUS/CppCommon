@@ -51,10 +51,10 @@ function(tests_setup_install)
         return()
     endif()
 
-    list(APPEND INSTALL_TARGETS cppcommon-tests)
+    list(APPEND INSTALL_TARGETS     cppcommon-tests)
     list(APPEND INSTALL_TARGETS_PDB cppcommon-tests)
 
-    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
+    set(INSTALL_TARGETS     "${INSTALL_TARGETS}"     PARENT_SCOPE)
     set(INSTALL_TARGETS_PDB "${INSTALL_TARGETS_PDB}" PARENT_SCOPE)
 endfunction()
 
@@ -117,6 +117,6 @@ function(tests_create_targets)
 
     enable_testing()
     add_test(NAME cppcommon-tests
-        COMMAND cppcommon-tests --durations yes --order lex
+        COMMAND   cppcommon-tests --durations yes --order lex
     )
 endfunction()
