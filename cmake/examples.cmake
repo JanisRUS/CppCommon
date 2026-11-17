@@ -43,9 +43,11 @@ function(examples_setup_target target)
 
     platform_setup_target(${target})
 
-    target_include_directories(${target}
-        PRIVATE ${EXAMPLES_INCLUDE_DIRS}
-    )
+    if(EXAMPLES_INCLUDE_DIRS)
+        target_include_directories(${target}
+            PRIVATE ${EXAMPLES_INCLUDE_DIRS}
+        )
+    endif()
 
     target_link_libraries(${target}
         PRIVATE
