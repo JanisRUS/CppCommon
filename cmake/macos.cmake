@@ -6,8 +6,34 @@ function(platform_init)
 endfunction()
 
 # @brief    Configure macOS platform settings
-# @details  Configure linker options shared by project targets
+# @details  Configure compiler and linker options shared by project targets
 function(platform_configure_settings)
+    # Configure Clang compiler settings
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+        )
+        target_link_options(cppcommon_platform_global_settings
+            INTERFACE -stdlib=libc++
+        )
+    endif()
+
+    # Configure common compiler warnings
+    target_compile_options(cppcommon_platform_global_settings
+        INTERFACE -Wall -Werror -Wshadow -pedantic
+    )
+
+    # Configure GCC compiler warnings
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE
+                -Wno-maybe-uninitialized
+                -Wno-overflow
+                -Wno-restrict
+                -Wno-stringop-overflow
+        )
+    endif()
+
     # Ignore duplicate libraries when linking with Apple Clang
     target_link_options(cppcommon_platform_global_settings
         INTERFACE -Wl,-no_warn_duplicate_libraries
