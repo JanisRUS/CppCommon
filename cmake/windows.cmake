@@ -4,6 +4,12 @@ function(platform_init)
     add_library(cppcommon_platform_global_settings INTERFACE)
     add_library(cppcommon_platform_target_settings INTERFACE)
 
+    find_path(CPPCOMMON_RPC_INCLUDE_DIR
+        NAMES rpc.h
+        REQUIRED
+    )
+    mark_as_advanced(CPPCOMMON_RPC_INCLUDE_DIR)
+
     if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
         find_library(CPPCOMMON_DBGHELP_LIBRARY
             NAMES dbghelp
@@ -128,9 +134,13 @@ function(platform_configure_settings)
     endif()
 
     # Configure Windows system and optional libraries for the core target
+    target_include_directories(cppcommon_platform_target_settings
+        INTERFACE "${CPPCOMMON_RPC_INCLUDE_DIR}"
+    )
+
     target_link_libraries(cppcommon_platform_target_settings
         INTERFACE
-            Rpcrt4
+            Rpcrt4 # Windows RPC Runtime
             Userenv
     )
 
