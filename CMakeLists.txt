@@ -1,13 +1,10 @@
-#
-# Common project settings
-#
-
 cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
 #
 # Project options
 #
+
 option(CPPCOMMON_ENABLE_TESTING            "Enable testing support"                    OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
 option(CPPCOMMON_BUILD_BENCHMARKS          "Build performance benchmarks"              OFF)
@@ -15,11 +12,14 @@ option(CPPCOMMON_BUILD_DOCUMENTATION       "Build documentation"                
 option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
 option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integration"   OFF)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS ON)
+
 #
-# Platform detection
+# Module selection
 #
 
-if(CMAKE_SYSTEM_NAME     STREQUAL "Windows")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     include(cmake/windows.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     include(cmake/macos.cmake)
@@ -29,37 +29,43 @@ else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-#
-# Functional modules
-#
-
 include(cmake/plugins.cmake)
 include(cmake/tests.cmake)
 include(cmake/examples.cmake)
+include(cmake/performance.cmake)
 
 #
-# Compiler features setup
+# 1. Initialization
 #
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS ON)
+add_library(cppcommon_global_settings INTERFACE)
 
-set(COMMON_COMPILE_OPTIONS)
-set(COMMON_CXX_COMPILE_OPTIONS)
-set(COMMON_LINK_OPTIONS)
-set(PEDANTIC_COMPILE_OPTIONS)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+platform_init()
+tests_init()
+examples_init()
+performance_init()
+
+#
+# 2. Configure settings
+#
+
+set(_common_compile_options)
+set(_common_cxx_compile_options)
+set(_common_link_options)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    list(APPEND COMMON_CXX_COMPILE_OPTIONS -stdlib=libc++)
-    list(APPEND COMMON_LINK_OPTIONS        -stdlib=libc++)
+    list(APPEND _common_cxx_compile_options -stdlib=libc++)
+    list(APPEND _common_link_options -stdlib=libc++)
 endif()
 
 if(NOT MSVC)
-    list(APPEND COMMON_COMPILE_OPTIONS   -Wall    -Werror)
-    list(APPEND PEDANTIC_COMPILE_OPTIONS -Wshadow -pedantic)
+    list(APPEND _common_compile_options -Wall -Werror -Wshadow -pedantic)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list(APPEND PEDANTIC_COMPILE_OPTIONS
+        list(APPEND _common_compile_options
             -Wno-maybe-uninitialized
             -Wno-overflow
             -Wno-restrict
@@ -68,48 +74,33 @@ if(NOT MSVC)
     endif()
 endif()
 
-platform_get_compiler_settings()
+if(_common_compile_options)
+    target_compile_options(cppcommon_global_settings
+        INTERFACE ${_common_compile_options}
+    )
+endif()
 
-tests_get_compiler_settings()
-examples_get_compiler_settings()
+if(_common_cxx_compile_options)
+    foreach(_compile_option IN LISTS _common_cxx_compile_options)
+        target_compile_options(cppcommon_global_settings
+            INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:${_compile_option}>"
+        )
+    endforeach()
+endif()
 
-add_compile_options(
-    ${COMMON_COMPILE_OPTIONS}
-    ${COMMON_CXX_COMPILE_OPTIONS}
-    ${PEDANTIC_COMPILE_OPTIONS}
-    ${PLATFORM_COMPILE_OPTIONS}
-    ${TESTS_COMPILE_OPTIONS}
-    ${EXAMPLES_COMPILE_OPTIONS}
-)
+if(_common_link_options)
+    target_link_options(cppcommon_global_settings
+        INTERFACE ${_common_link_options}
+    )
+endif()
 
-add_compile_definitions(
-    ${PLATFORM_COMPILE_DEFINITIONS}
-    ${TESTS_COMPILE_DEFINITIONS}
-    ${EXAMPLES_COMPILE_DEFINITIONS}
-)
-
-add_link_options(
-    ${COMMON_LINK_OPTIONS}
-    ${PLATFORM_LINK_OPTIONS}
-    ${TESTS_LINK_OPTIONS}
-    ${EXAMPLES_LINK_OPTIONS}
-)
-
-message("-- The System identification is ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_INFO_FILE}")
+platform_configure_settings()
+tests_configure_settings()
+examples_configure_settings()
+performance_configure_settings()
 
 #
-# Libraries setup
-#
-
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
-platform_get_libraries()
-tests_get_libraries()
-examples_get_libraries()
-
-#
-# Library target
+# 3. Create targets
 #
 
 file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h"   "source/*.h")
@@ -122,7 +113,9 @@ add_library(cppcommon
     ${LIB_SOURCE_FILES}
 )
 
-set_property(TARGET cppcommon PROPERTY FOLDER "libraries")
+set_target_properties(cppcommon PROPERTIES
+    FOLDER "libraries"
+)
 
 target_include_directories(cppcommon
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
@@ -132,60 +125,62 @@ target_link_libraries(cppcommon
     PUBLIC
         Threads::Threads
         fmt
+    PRIVATE
+        cppcommon_global_settings
+        cppcommon_platform_global_settings
+        cppcommon_platform_target_settings
 )
-
-platform_setup_target(cppcommon)
-
-tests_setup_target(cppcommon)
-examples_setup_target(cppcommon)
-
-if(CPPCOMMON_BUILD_BENCHMARKS)
-    include(performance/CMakeLists.txt)
-endif()
-
-#
-# Install and uninstall setup
-#
-
-platform_setup_install()
-tests_setup_install()
-examples_setup_install()
-
-platform_setup_uninstall()
-tests_setup_uninstall()
-examples_setup_uninstall()
-
-#
-# Additional targets and rules
-#
 
 platform_create_targets()
 tests_create_targets()
 examples_create_targets()
+performance_create_targets()
 
 #
-# TODO Install rule configuration
+# 4. Install
 #
-if(NOT CPPCOMMON_MODULE)
 
-  # Install
-  install(TARGETS ${INSTALL_TARGETS}
-    RUNTIME DESTINATION "${PROJECT_SOURCE_DIR}/bin"
-    LIBRARY DESTINATION "${PROJECT_SOURCE_DIR}/bin"
-    ARCHIVE DESTINATION "${PROJECT_SOURCE_DIR}/bin")
+set(INSTALL_TARGETS)
+set(INSTALL_PATHS)
 
-  # Install *.pdb files
-  if(MSVC)
-    foreach(INSTALL_TARGET_PDB ${INSTALL_TARGETS_PDB})
-      install(FILES $<TARGET_PDB_FILE:${INSTALL_TARGET_PDB}> DESTINATION "${PROJECT_SOURCE_DIR}/bin")
+platform_install()
+tests_install()
+examples_install()
+performance_install()
+
+list(LENGTH INSTALL_TARGETS _install_target_count)
+list(LENGTH INSTALL_PATHS _install_path_count)
+
+if(NOT _install_target_count EQUAL _install_path_count)
+    message(FATAL_ERROR "INSTALL_TARGETS and INSTALL_PATHS must have the same length")
+endif()
+
+if(_install_target_count GREATER 0)
+    math(EXPR _install_last_index "${_install_target_count} - 1")
+
+    foreach(_install_index RANGE 0 ${_install_last_index})
+        list(GET INSTALL_TARGETS ${_install_index} _install_target)
+        list(GET INSTALL_PATHS ${_install_index} _install_path)
+
+        install(TARGETS ${_install_target}
+            RUNTIME DESTINATION "${_install_path}"
+            LIBRARY DESTINATION "${_install_path}"
+            ARCHIVE DESTINATION "${_install_path}"
+        )
+
+        if(MSVC)
+            install(FILES "$<TARGET_PDB_FILE:${_install_target}>"
+                DESTINATION "${_install_path}"
+                OPTIONAL
+            )
+        endif()
     endforeach()
-  endif()
-
 endif()
 
 #
-# TODO Documentation rule configuration
+# Documentation
 #
+
 if(CPPCOMMON_BUILD_DOCUMENTATION)
     find_program(DOXYGEN doxygen)
     if(DOXYGEN)
