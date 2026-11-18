@@ -48,6 +48,14 @@ tests_init()
 examples_init()
 performance_init()
 
+target_link_libraries(cppcommon_global_settings
+    INTERFACE
+        cppcommon_platform_global_settings
+        cppcommon_tests_global_settings
+        cppcommon_examples_global_settings
+        cppcommon_performance_global_settings
+)
+
 #
 # 2. Configure settings
 #
@@ -127,7 +135,6 @@ target_link_libraries(cppcommon
         fmt
     PRIVATE
         cppcommon_global_settings
-        cppcommon_platform_global_settings
         cppcommon_platform_target_settings
 )
 
