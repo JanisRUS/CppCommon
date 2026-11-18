@@ -1,45 +1,26 @@
 # @brief    Initialize Linux platform support
-# @details  Discover optional Linux system libraries and create platform settings targets
+# @details  Discover Linux system libraries and create platform settings targets
 function(platform_init)
     add_library(cppcommon_platform_global_settings INTERFACE)
     add_library(cppcommon_platform_target_settings INTERFACE)
 
-    find_package(LibBFD)
-    find_package(LibDL)
-    find_package(LibRT)
-    find_package(LibUUID)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LibUUID REQUIRED IMPORTED_TARGET uuid)
 
-    set(_platform_libraries)
-    set(_platform_include_directories)
+    find_library(CPPCOMMON_RT_LIBRARY NAMES rt REQUIRED)
+    mark_as_advanced(CPPCOMMON_RT_LIBRARY)
 
-    if(LIBBFD_FOUND)
-        list(APPEND _platform_libraries ${LIBBFD_LIBRARIES})
-        list(APPEND _platform_include_directories ${LIBBFD_INCLUDE_DIR})
+    if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
+        find_path(CPPCOMMON_BFD_INCLUDE_DIR NAMES bfd.h REQUIRED)
+        find_library(CPPCOMMON_BFD_LIBRARY NAMES bfd REQUIRED)
+        mark_as_advanced(CPPCOMMON_BFD_INCLUDE_DIR CPPCOMMON_BFD_LIBRARY)
+
+        add_library(cppcommon_platform_bfd UNKNOWN IMPORTED)
+        set_target_properties(cppcommon_platform_bfd PROPERTIES
+            IMPORTED_LOCATION "${CPPCOMMON_BFD_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_BFD_INCLUDE_DIR}"
+        )
     endif()
-
-    if(LIBDL_FOUND)
-        list(APPEND _platform_libraries ${LIBDL_LIBRARIES})
-        list(APPEND _platform_include_directories ${LIBDL_INCLUDE_DIR})
-    endif()
-
-    if(LIBRT_FOUND)
-        list(APPEND _platform_libraries ${LIBRT_LIBRARIES})
-        list(APPEND _platform_include_directories ${LIBRT_INCLUDE_DIR})
-    endif()
-
-    if(LIBUUID_FOUND)
-        list(APPEND _platform_libraries ${LIBUUID_LIBRARIES})
-        list(APPEND _platform_include_directories ${LIBUUID_INCLUDE_DIR})
-    endif()
-
-    set(CPPCOMMON_PLATFORM_LIBRARIES
-        "${_platform_libraries}"
-        PARENT_SCOPE
-    )
-    set(CPPCOMMON_PLATFORM_INCLUDE_DIRECTORIES
-        "${_platform_include_directories}"
-        PARENT_SCOPE
-    )
 endfunction()
 
 # @brief    Configure Linux platform settings
@@ -71,15 +52,26 @@ function(platform_configure_settings)
         )
     endif()
 
-    if(CPPCOMMON_PLATFORM_INCLUDE_DIRECTORIES)
-        target_include_directories(cppcommon_platform_target_settings
-            INTERFACE ${CPPCOMMON_PLATFORM_INCLUDE_DIRECTORIES}
-        )
-    endif()
+    target_compile_definitions(cppcommon_platform_global_settings
+        INTERFACE
+            LIBUUID_SUPPORT
+            LIBDL_SUPPORT
+            LIBRT_SUPPORT
+    )
 
-    if(CPPCOMMON_PLATFORM_LIBRARIES)
+    target_link_libraries(cppcommon_platform_target_settings
+        INTERFACE
+            PkgConfig::LibUUID
+            ${CMAKE_DL_LIBS}
+            "${CPPCOMMON_RT_LIBRARY}"
+    )
+
+    if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
+        target_compile_definitions(cppcommon_platform_global_settings
+            INTERFACE LIBBFD_SUPPORT
+        )
         target_link_libraries(cppcommon_platform_target_settings
-            INTERFACE ${CPPCOMMON_PLATFORM_LIBRARIES}
+            INTERFACE cppcommon_platform_bfd
         )
     endif()
 endfunction()
