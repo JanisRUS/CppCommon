@@ -51,7 +51,7 @@ function(tests_create_targets)
 
     target_link_libraries(cppcommon-tests
         PRIVATE
-            cppcommon_tests_global_settings
+            cppcommon_global_settings
             cppcommon
             Catch2::Catch2WithMain
     )
