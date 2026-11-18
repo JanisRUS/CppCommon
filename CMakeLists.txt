@@ -60,46 +60,29 @@ target_link_libraries(cppcommon_global_settings
 # 2. Configure settings
 #
 
-set(_common_compile_options)
-set(_common_cxx_compile_options)
-set(_common_link_options)
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    list(APPEND _common_cxx_compile_options -stdlib=libc++)
-    list(APPEND _common_link_options -stdlib=libc++)
+    target_compile_options(cppcommon_global_settings
+        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+    )
+    target_link_options(cppcommon_global_settings
+        INTERFACE -stdlib=libc++
+    )
 endif()
 
 if(NOT MSVC)
-    list(APPEND _common_compile_options -Wall -Werror -Wshadow -pedantic)
+    target_compile_options(cppcommon_global_settings
+        INTERFACE -Wall -Werror -Wshadow -pedantic
+    )
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list(APPEND _common_compile_options
-            -Wno-maybe-uninitialized
-            -Wno-overflow
-            -Wno-restrict
-            -Wno-stringop-overflow
+        target_compile_options(cppcommon_global_settings
+            INTERFACE
+                -Wno-maybe-uninitialized
+                -Wno-overflow
+                -Wno-restrict
+                -Wno-stringop-overflow
         )
     endif()
-endif()
-
-if(_common_compile_options)
-    target_compile_options(cppcommon_global_settings
-        INTERFACE ${_common_compile_options}
-    )
-endif()
-
-if(_common_cxx_compile_options)
-    foreach(_compile_option IN LISTS _common_cxx_compile_options)
-        target_compile_options(cppcommon_global_settings
-            INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:${_compile_option}>"
-        )
-    endforeach()
-endif()
-
-if(_common_link_options)
-    target_link_options(cppcommon_global_settings
-        INTERFACE ${_common_link_options}
-    )
 endif()
 
 platform_configure_settings()
