@@ -55,7 +55,7 @@ function(examples_create_targets)
 
         target_link_libraries(${EXAMPLE_TARGET}
             PRIVATE
-                cppcommon_examples_global_settings
+                cppcommon_global_settings
                 cppcommon
         )
 
