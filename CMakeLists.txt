@@ -60,31 +60,6 @@ target_link_libraries(cppcommon_global_settings
 # 2. Configure settings
 #
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(cppcommon_global_settings
-        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
-    )
-    target_link_options(cppcommon_global_settings
-        INTERFACE -stdlib=libc++
-    )
-endif()
-
-if(NOT MSVC)
-    target_compile_options(cppcommon_global_settings
-        INTERFACE -Wall -Werror -Wshadow -pedantic
-    )
-
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(cppcommon_global_settings
-            INTERFACE
-                -Wno-maybe-uninitialized
-                -Wno-overflow
-                -Wno-restrict
-                -Wno-stringop-overflow
-        )
-    endif()
-endif()
-
 platform_configure_settings()
 tests_configure_settings()
 examples_configure_settings()
