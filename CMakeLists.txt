@@ -42,6 +42,7 @@ add_library(cppcommon_global_settings INTERFACE)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 platform_init()
 tests_init()
@@ -90,7 +91,7 @@ target_include_directories(cppcommon
 target_link_libraries(cppcommon
     PUBLIC
         Threads::Threads
-        fmt
+        fmt::fmt
     PRIVATE
         cppcommon_global_settings
         cppcommon_platform_target_settings
