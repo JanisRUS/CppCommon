@@ -38,6 +38,10 @@ foreach(PLUGIN_NAME IN LISTS PLUGIN_DIRECTORIES)
         PRIVATE EXPORTS
     )
 
+    target_link_libraries(${PLUGIN_TARGET}
+        PRIVATE cppcommon_global_settings
+    )
+
     set_target_properties(${PLUGIN_TARGET} PROPERTIES
         FOLDER "plugins"
     )
