@@ -1,98 +1,83 @@
-# @brief    Find Windows system and optional libraries
-# @details  Discover Windows system libraries and optionally enable Visual Leak
-#               Detector when both its header and library are available
-# @note     Output variables:
-#           - PLATFORM_LIBS
-#           - PLATFORM_INCLUDE_DIRS
-function(platform_get_libraries)
-    set(PLATFORM_LIBS)
-    set(PLATFORM_INCLUDE_DIRS)
+# @brief    Initialize Windows platform support
+# @details  Create platform settings targets and discover enabled optional dependencies
+function(platform_init)
+    add_library(cppcommon_platform_global_settings INTERFACE)
+    add_library(cppcommon_platform_target_settings INTERFACE)
 
-    find_package(DbgHelp)
-    find_package(RPC)
-    find_package(Userenv)
+    if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
+        find_library(CPPCOMMON_DBGHELP_LIBRARY
+            NAMES dbghelp
+            REQUIRED
+        )
+        mark_as_advanced(CPPCOMMON_DBGHELP_LIBRARY)
 
-    list(APPEND PLATFORM_LIBS ${DBGHELP_LIBRARIES})
-    list(APPEND PLATFORM_LIBS ${RPC_LIBRARIES})
-    list(APPEND PLATFORM_LIBS ${USERENV_LIBRARIES})
-
-    # Visual Leak Detector is optional
-    find_path(VLD_INCLUDE_DIR
-        NAMES vld.h
-        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
-    )
-    find_library(VLD_LIBRARY
-        NAMES vld
-        HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
-    )
-
-    mark_as_advanced(VLD_INCLUDE_DIR VLD_LIBRARY)
-
-    if(VLD_INCLUDE_DIR AND VLD_LIBRARY)
-        if(NOT TARGET VLD::VLD)
-            add_library(VLD::VLD UNKNOWN IMPORTED)
-            set_target_properties(VLD::VLD PROPERTIES
-                IMPORTED_LOCATION "${VLD_LIBRARY}"
-            )
-        endif()
-
-        list(APPEND PLATFORM_LIBS VLD::VLD)
-        list(APPEND PLATFORM_INCLUDE_DIRS "${VLD_INCLUDE_DIR}")
+        add_library(cppcommon_platform_dbghelp UNKNOWN IMPORTED)
+        set_target_properties(cppcommon_platform_dbghelp PROPERTIES
+            IMPORTED_LOCATION "${CPPCOMMON_DBGHELP_LIBRARY}"
+        )
     endif()
 
-    set(PLATFORM_LIBS         "${PLATFORM_LIBS}"         PARENT_SCOPE)
-    set(PLATFORM_INCLUDE_DIRS "${PLATFORM_INCLUDE_DIRS}" PARENT_SCOPE)
+    if(CPPCOMMON_ENABLE_VLD)
+        find_path(CPPCOMMON_VLD_INCLUDE_DIR
+            NAMES vld.h
+            HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
+            REQUIRED
+        )
+        find_library(CPPCOMMON_VLD_LIBRARY
+            NAMES vld
+            HINTS "${CMAKE_CURRENT_SOURCE_DIR}/modules/vld/bin"
+            REQUIRED
+        )
+        mark_as_advanced(CPPCOMMON_VLD_INCLUDE_DIR CPPCOMMON_VLD_LIBRARY)
+
+        add_library(cppcommon_platform_vld UNKNOWN IMPORTED)
+        set_target_properties(cppcommon_platform_vld PROPERTIES
+            IMPORTED_LOCATION "${CPPCOMMON_VLD_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_VLD_INCLUDE_DIR}"
+        )
+    endif()
 endfunction()
 
-# @brief    Configure Windows compiler settings
-# @details  Initialize Windows compiler settings and enable VLD support
-#               only when the optional Visual Leak Detector components are available
-# @note     Output variables:
-#           - PLATFORM_COMPILE_DEFINITIONS
-#           - PLATFORM_COMPILE_OPTIONS
-#           - PLATFORM_LINK_OPTIONS
-function(platform_get_compiler_settings)
-    set(PLATFORM_COMPILE_DEFINITIONS)
-    set(PLATFORM_COMPILE_OPTIONS)
-    set(PLATFORM_LINK_OPTIONS)
-
-    if(VLD_INCLUDE_DIR AND VLD_LIBRARY)
-        list(APPEND PLATFORM_COMPILE_DEFINITIONS VLD_SUPPORT)
-    endif()
+# @brief    Configure Windows platform settings
+# @details  Populate platform settings targets with compiler options and dependencies
+function(platform_configure_settings)
+    set(_platform_compile_definitions)
+    set(_platform_compile_options)
+    set(_platform_link_options)
 
     # Configure MinGW-w64 compiler options
     if(MINGW)
         # Increase the number of sections that an object file can contain
-        list(APPEND PLATFORM_COMPILE_OPTIONS -Wa,-mbig-obj)
+        list(APPEND _platform_compile_options -Wa,-mbig-obj)
 
         # Link the GCC and C++ standard libraries statically
-        list(APPEND PLATFORM_LINK_OPTIONS -static-libgcc -static-libstdc++)
+        list(APPEND _platform_link_options -static-libgcc -static-libstdc++)
     endif()
 
     # Configure Visual Studio compiler options
     if(MSVC)
         # Increase the number of sections that an object file can contain
-        list(APPEND PLATFORM_COMPILE_OPTIONS /bigobj)
+        list(APPEND _platform_compile_options /bigobj)
 
         # Use UTF-8 for source and execution character sets
-        list(APPEND PLATFORM_COMPILE_OPTIONS /utf-8)
+        list(APPEND _platform_compile_options /utf-8)
 
         # Report the correct value of __cplusplus
-        list(APPEND PLATFORM_COMPILE_OPTIONS /Zc:__cplusplus)
+        list(APPEND _platform_compile_options /Zc:__cplusplus)
 
         # Configure compiler warnings
-        list(APPEND PLATFORM_COMPILE_OPTIONS /W4 /WX /wd4100 /wd4250)
+        list(APPEND _platform_compile_options /W4 /WX /wd4100 /wd4250)
     endif()
 
     # Configure Windows platform definitions
     if(CYGWIN)
-        list(APPEND PLATFORM_COMPILE_DEFINITIONS
+        list(APPEND _platform_compile_definitions
             WIN32
             WIN32_LEAN_AND_MEAN
             _WIN32_WINNT=0x0A00
         )
     elseif(WIN32)
-        list(APPEND PLATFORM_COMPILE_DEFINITIONS
+        list(APPEND _platform_compile_definitions
             WIN32
             WIN32_LEAN_AND_MEAN
             _CRT_SECURE_NO_DEPRECATE
@@ -118,51 +103,62 @@ function(platform_get_compiler_settings)
         endif()
 
         if(_windows_sdk_version)
-            list(APPEND PLATFORM_COMPILE_DEFINITIONS
+            list(APPEND _platform_compile_definitions
                 _WIN32_SDK=${_windows_sdk_version}
             )
         endif()
     endif()
 
-    set(PLATFORM_COMPILE_DEFINITIONS "${PLATFORM_COMPILE_DEFINITIONS}" PARENT_SCOPE)
-    set(PLATFORM_COMPILE_OPTIONS     "${PLATFORM_COMPILE_OPTIONS}"     PARENT_SCOPE)
-    set(PLATFORM_LINK_OPTIONS        "${PLATFORM_LINK_OPTIONS}"        PARENT_SCOPE)
-endfunction()
-
-# @brief    Configure target-specific Windows settings
-# @details  Apply Windows-specific settings to the requested target
-# @param    target Target name
-function(platform_setup_target target)
-    if("${target}" STREQUAL "cppcommon" AND CPPCOMMON_ENABLE_VLD)
-        target_include_directories(cppcommon PRIVATE "${VLD_INCLUDE_DIR}")
-        target_link_libraries(     cppcommon PRIVATE VLD::VLD)
-        target_compile_definitions(cppcommon PRIVATE VLD_SUPPORT)
+    if(_platform_compile_definitions)
+        target_compile_definitions(cppcommon_platform_global_settings
+            INTERFACE ${_platform_compile_definitions}
+        )
     endif()
 
-    if("${target}" STREQUAL "cppcommon-tests"              OR 
-       "${target}" STREQUAL "cppcommon-example-system_dll")
-        target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/plugins")
+    if(_platform_compile_options)
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE ${_platform_compile_options}
+        )
+    endif()
+
+    if(_platform_link_options)
+        target_link_options(cppcommon_platform_global_settings
+            INTERFACE ${_platform_link_options}
+        )
+    endif()
+
+    # Configure Windows system and optional libraries for the core target
+    target_link_libraries(cppcommon_platform_target_settings
+        INTERFACE
+            Rpcrt4
+            Userenv
+    )
+
+    if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
+        target_compile_definitions(cppcommon_platform_target_settings
+            INTERFACE DBGHELP_SUPPORT
+        )
+        target_link_libraries(cppcommon_platform_target_settings
+            INTERFACE cppcommon_platform_dbghelp
+        )
+    endif()
+
+    if(CPPCOMMON_ENABLE_VLD)
+        target_compile_definitions(cppcommon_platform_target_settings
+            INTERFACE VLD_SUPPORT
+        )
+        target_link_libraries(cppcommon_platform_target_settings
+            INTERFACE cppcommon_platform_vld
+        )
     endif()
 endfunction()
 
-# @brief      Configure Windows installation rules
-# @details    Provide the platform-specific installation hook. No additional
-#               Windows installation rules are required at this stage
-# @note       This function currently has no side effects
-function(platform_setup_install)
-
-endfunction()
-
-# @brief      Configure Windows uninstallation rules
-# @details    Provide the platform-specific uninstallation hook. No additional
-#             Windows uninstallation rules are required at this stage
-# @note       This function currently has no side effects
-function(platform_setup_uninstall)
-
-endfunction()
-
-# @brief      Create additional platform targets
-# @details    Provide the platform-specific target creation hook
-# @note       This function currently has no side effects
+# @brief    Create additional Windows platform targets
+# @details  No additional platform targets are required
 function(platform_create_targets)
+endfunction()
+
+# @brief    Configure Windows platform installation
+# @details  No platform-specific installation entries are required
+function(platform_install)
 endfunction()
