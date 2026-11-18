@@ -46,8 +46,6 @@ function(performance_create_targets)
         target_link_libraries(${_benchmark_target}
             PRIVATE
                 cppcommon_global_settings
-                cppcommon_performance_global_settings
-                cppcommon_plugins_global_settings
                 cppcommon
                 cppbenchmark
         )
