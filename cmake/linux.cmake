@@ -43,8 +43,34 @@ function(platform_init)
 endfunction()
 
 # @brief    Configure Linux platform settings
-# @details  Populate the platform settings targets with discovered dependencies
+# @details  Populate platform settings targets with compiler options and dependencies
 function(platform_configure_settings)
+    # Configure Clang compiler settings
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+        )
+        target_link_options(cppcommon_platform_global_settings
+            INTERFACE -stdlib=libc++
+        )
+    endif()
+
+    # Configure common compiler warnings
+    target_compile_options(cppcommon_platform_global_settings
+        INTERFACE -Wall -Werror -Wshadow -pedantic
+    )
+
+    # Configure GCC compiler warnings
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE
+                -Wno-maybe-uninitialized
+                -Wno-overflow
+                -Wno-restrict
+                -Wno-stringop-overflow
+        )
+    endif()
+
     if(CPPCOMMON_PLATFORM_INCLUDE_DIRECTORIES)
         target_include_directories(cppcommon_platform_target_settings
             INTERFACE ${CPPCOMMON_PLATFORM_INCLUDE_DIRECTORIES}
