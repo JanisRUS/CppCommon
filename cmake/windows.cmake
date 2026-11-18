@@ -51,6 +51,30 @@ function(platform_configure_settings)
     set(_platform_compile_options)
     set(_platform_link_options)
 
+    # Configure Clang compiler settings
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        target_compile_options(cppcommon_platform_global_settings
+            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+        )
+        target_link_options(cppcommon_platform_global_settings
+            INTERFACE -stdlib=libc++
+        )
+    endif()
+
+    # Configure GCC and Clang compiler warnings
+    if(NOT MSVC)
+        list(APPEND _platform_compile_options -Wall -Werror -Wshadow -pedantic)
+
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            list(APPEND _platform_compile_options
+                -Wno-maybe-uninitialized
+                -Wno-overflow
+                -Wno-restrict
+                -Wno-stringop-overflow
+            )
+        endif()
+    endif()
+
     # Configure MinGW-w64 compiler options
     if(MINGW)
         # Increase the number of sections that an object file can contain
