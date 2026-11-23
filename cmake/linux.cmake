@@ -82,6 +82,19 @@ function(platform_create_targets)
 endfunction()
 
 # @brief    Configure Linux platform installation
-# @details  No platform-specific installation entries are required
+# @details  Preserve the system link dependencies of an installed static library
 function(platform_install)
+    target_link_libraries(cppcommon
+        INTERFACE
+            "$<INSTALL_INTERFACE:$<LINK_ONLY:PkgConfig::LibUUID>>"
+            "$<INSTALL_INTERFACE:$<LINK_ONLY:${CMAKE_DL_LIBS}>>"
+            "$<INSTALL_INTERFACE:$<LINK_ONLY:rt>>"
+    )
+
+    if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
+        message(WARNING
+            "Installed static CppCommon with BFD support requires separate "
+            "validation of BFD transitive link dependencies"
+        )
+    endif()
 endfunction()
