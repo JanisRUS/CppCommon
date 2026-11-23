@@ -64,18 +64,25 @@ function(performance_create_targets)
     set(PERFORMANCE_TARGETS "${_performance_targets}" PARENT_SCOPE)
 endfunction()
 
-# @brief    Configure install variables
-# @details  Configures install variables for module targets 
+# @brief    Install performance artifacts
+# @details  Register benchmark executables in the Performance component
 function(performance_install)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
     endif()
 
     foreach(_performance_target IN LISTS PERFORMANCE_TARGETS)
-        list(APPEND INSTALL_TARGETS "${_performance_target}")
-        list(APPEND INSTALL_PATHS   "${PROJECT_SOURCE_DIR}/bin")
-    endforeach()
+        install(TARGETS ${_performance_target}
+            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+            COMPONENT Performance
+        )
 
-    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-    set(INSTALL_PATHS   "${INSTALL_PATHS}"   PARENT_SCOPE)
+        if(MSVC)
+            install(FILES "$<TARGET_PDB_FILE:${_performance_target}>"
+                DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                COMPONENT Performance
+                OPTIONAL
+            )
+        endif()
+    endforeach()
 endfunction()
