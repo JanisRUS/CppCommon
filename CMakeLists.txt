@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 #
 # Project options
 #
@@ -80,12 +83,19 @@ add_library(cppcommon
     ${LIB_SOURCE_FILES}
 )
 
+add_library(CppCommon::CppCommon ALIAS cppcommon)
+set_target_properties(cppcommon PROPERTIES
+    EXPORT_NAME CppCommon
+)
+
 set_target_properties(cppcommon PROPERTIES
     FOLDER "libraries"
 )
 
 target_include_directories(cppcommon
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 target_link_libraries(cppcommon
@@ -93,8 +103,8 @@ target_link_libraries(cppcommon
         Threads::Threads
         fmt::fmt
     PRIVATE
-        cppcommon_global_settings
-        cppcommon_platform_target_settings
+        "$<BUILD_INTERFACE:cppcommon_global_settings>"
+        "$<BUILD_INTERFACE:cppcommon_platform_target_settings>"
 )
 
 platform_create_targets()
@@ -106,6 +116,44 @@ performance_create_targets()
 # 4. Install
 #
 
+# Keep the core installation self-contained and relocatable.
+install(TARGETS cppcommon
+    EXPORT CppCommonTargets
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT Core
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT Core
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT Core
+)
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    COMPONENT Core
+    FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.inl"
+)
+
+set(_cppcommon_package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppCommonConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
+    INSTALL_DESTINATION "${_cppcommon_package_dir}"
+)
+
+install(EXPORT CppCommonTargets
+    FILE CppCommonTargets.cmake
+    NAMESPACE CppCommon::
+    DESTINATION "${_cppcommon_package_dir}"
+    COMPONENT Core
+)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
+    DESTINATION "${_cppcommon_package_dir}"
+    COMPONENT Core
+)
+
+# Platform modules provide the install-tree link requirements.
+# Later migration will eliminate these legacy lists.
 set(INSTALL_TARGETS)
 set(INSTALL_PATHS)
 
