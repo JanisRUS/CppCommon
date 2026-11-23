@@ -52,3 +52,10 @@ endforeach()
 set_property(GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS
     "${CPPCOMMON_PLUGIN_TARGETS}"
 )
+
+# Install the plugin fixtures together with Core whenever they are built.
+install(TARGETS ${CPPCOMMON_PLUGIN_TARGETS}
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    COMPONENT Core
+)
