@@ -62,16 +62,23 @@ function(tests_create_targets)
     )
 endfunction()
 
-# @brief    Prepare test installation data
-# @details  Add the test executable and its destination to the project install lists
+# @brief    Install test artifacts
+# @details  Register the test executable in the Tests component
 function(tests_install)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
 
-    list(APPEND INSTALL_TARGETS cppcommon-tests)
-    list(APPEND INSTALL_PATHS "${PROJECT_SOURCE_DIR}/bin")
+    install(TARGETS cppcommon-tests
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        COMPONENT Tests
+    )
 
-    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-    set(INSTALL_PATHS "${INSTALL_PATHS}" PARENT_SCOPE)
+    if(MSVC)
+        install(FILES "$<TARGET_PDB_FILE:cppcommon-tests>"
+            DESTINATION "${CMAKE_INSTALL_BINDIR}"
+            COMPONENT Tests
+            OPTIONAL
+        )
+    endif()
 endfunction()
