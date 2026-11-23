@@ -69,8 +69,8 @@ function(examples_create_targets)
     endforeach()
 endfunction()
 
-# @brief    Prepare example installation data
-# @details  Add example targets and destinations to the project install lists
+# @brief    Install example artifacts
+# @details  Register example executables in the Examples component
 function(examples_install)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
         return()
@@ -82,10 +82,19 @@ function(examples_install)
 
     foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
         get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
-        list(APPEND INSTALL_TARGETS "cppcommon-example-${EXAMPLE_NAME}")
-        list(APPEND INSTALL_PATHS "${PROJECT_SOURCE_DIR}/bin")
-    endforeach()
+        set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
 
-    set(INSTALL_TARGETS "${INSTALL_TARGETS}" PARENT_SCOPE)
-    set(INSTALL_PATHS "${INSTALL_PATHS}" PARENT_SCOPE)
+        install(TARGETS ${EXAMPLE_TARGET}
+            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+            COMPONENT Examples
+        )
+
+        if(MSVC)
+            install(FILES "$<TARGET_PDB_FILE:${EXAMPLE_TARGET}>"
+                DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                COMPONENT Examples
+                OPTIONAL
+            )
+        endif()
+    endforeach()
 endfunction()
