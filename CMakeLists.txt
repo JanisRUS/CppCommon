@@ -152,44 +152,10 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
     COMPONENT Core
 )
 
-# Platform modules provide the install-tree link requirements.
-# Later migration will eliminate these legacy lists.
-set(INSTALL_TARGETS)
-set(INSTALL_PATHS)
-
 platform_install()
 tests_install()
 examples_install()
 performance_install()
-
-list(LENGTH INSTALL_TARGETS _install_target_count)
-list(LENGTH INSTALL_PATHS _install_path_count)
-
-if(NOT _install_target_count EQUAL _install_path_count)
-    message(FATAL_ERROR "INSTALL_TARGETS and INSTALL_PATHS must have the same length")
-endif()
-
-if(_install_target_count GREATER 0)
-    math(EXPR _install_last_index "${_install_target_count} - 1")
-
-    foreach(_install_index RANGE 0 ${_install_last_index})
-        list(GET INSTALL_TARGETS ${_install_index} _install_target)
-        list(GET INSTALL_PATHS ${_install_index} _install_path)
-
-        install(TARGETS ${_install_target}
-            RUNTIME DESTINATION "${_install_path}"
-            LIBRARY DESTINATION "${_install_path}"
-            ARCHIVE DESTINATION "${_install_path}"
-        )
-
-        if(MSVC)
-            install(FILES "$<TARGET_PDB_FILE:${_install_target}>"
-                DESTINATION "${_install_path}"
-                OPTIONAL
-            )
-        endif()
-    endforeach()
-endif()
 
 #
 # Documentation
