@@ -1,3 +1,10 @@
+add_library(cppcommon_plugins_target_settings INTERFACE)
+
+target_include_directories(cppcommon_plugins_target_settings
+    INTERFACE
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 # Build the shared libraries used by the DLL tests and example.
 file(GLOB PLUGIN_DIRECTORIES
     LIST_DIRECTORIES true

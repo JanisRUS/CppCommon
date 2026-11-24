@@ -64,6 +64,10 @@ function(examples_create_targets)
         )
 
         if(EXAMPLE_NAME STREQUAL "system_dll")
+            target_link_libraries(${EXAMPLE_TARGET}
+                PRIVATE cppcommon_plugins_target_settings
+            )
+
             add_dependencies(${EXAMPLE_TARGET} ${PLUGIN_TARGETS})
         endif()
     endforeach()
