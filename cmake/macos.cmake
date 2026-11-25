@@ -2,7 +2,7 @@
 # @details  Create platform settings targets
 function(cppcommon_platform_init)
     add_library(cppcommon-platform-global-settings INTERFACE)
-    add_library(cppcommon_platform_target_settings INTERFACE)
+    add_library(cppcommon-platform-target-settings INTERFACE)
 endfunction()
 
 # @brief    Configure macOS platform settings
@@ -11,16 +11,19 @@ function(cppcommon_platform_configure_settings)
     # Configure Clang compiler settings
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(cppcommon-platform-global-settings
-            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+            INTERFACE
+                $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
         )
         target_link_options(cppcommon-platform-global-settings
-            INTERFACE -stdlib=libc++
+            INTERFACE
+                -stdlib=libc++
         )
     endif()
 
     # Configure common compiler warnings
     target_compile_options(cppcommon-platform-global-settings
-        INTERFACE -Wall -Werror -Wshadow -pedantic
+        INTERFACE
+            -Wall -Werror -Wshadow -pedantic
     )
 
     # Configure GCC compiler warnings
@@ -36,7 +39,8 @@ function(cppcommon_platform_configure_settings)
 
     # Ignore duplicate libraries when linking with Apple Clang
     target_link_options(cppcommon-platform-global-settings
-        INTERFACE -Wl,-no_warn_duplicate_libraries
+        INTERFACE
+            -Wl,-no_warn_duplicate_libraries
     )
 endfunction()
 
