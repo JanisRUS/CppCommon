@@ -66,10 +66,6 @@ endfunction()
 # @brief    Configure tests module installation
 # @details  Register the created test targets in the Tests component
 function(cppcommon_tests_install)
-    if(NOT CPPCOMMON_ENABLE_TESTING)
-        return()
-    endif()
-
     get_property(tests_targets GLOBAL PROPERTY CPPCOMMON_TESTS_TARGETS)
 
     if(NOT tests_targets)
