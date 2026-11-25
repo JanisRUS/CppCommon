@@ -1,4 +1,4 @@
-get_filename_component(CPPCOMMON_EXAMPLES_DIR "${CMAKE_CURRENT_LIST_DIR}/../examples" ABSOLUTE)
+set(CPPCOMMON_EXAMPLES_DIR "${CMAKE_CURRENT_LIST_DIR}/../examples")
 set(CPPCOMMON_EXAMPLES_TARGET_PREFIX "cppcommon-example-")
 
 # @brief    Initialize the examples module
@@ -31,12 +31,7 @@ function(cppcommon_examples_create_targets)
         "${CPPCOMMON_EXAMPLES_DIR}/*.cpp"
     )
 
-    list(FIND example_source_files
-        "${CPPCOMMON_EXAMPLES_DIR}/system_dll.cpp"
-        system_dll_example_index
-    )
-
-    if(NOT system_dll_example_index EQUAL -1)
+    if(EXISTS "${CPPCOMMON_EXAMPLES_DIR}/system_dll.cpp")
         cppcommon_plugins_check()
         get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
