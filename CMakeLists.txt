@@ -10,7 +10,7 @@ include(CMakePackageConfigHelpers)
 
 option(CPPCOMMON_ENABLE_TESTING            "Enable testing support"                    OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
-option(CPPCOMMON_BUILD_PERFORMANCE          "Build performance benchmarks"              OFF)
+option(CPPCOMMON_BUILD_PERFORMANCE         "Build performance benchmarks"              OFF)
 option(CPPCOMMON_BUILD_DOCUMENTATION       "Build documentation"                       OFF)
 option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
 option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integration"   OFF)
@@ -38,7 +38,7 @@ include(cmake/examples.cmake)
 include(cmake/performance.cmake)
 
 #
-# Initialization
+# Modules initialization
 #
 
 add_library(cppcommon-global-settings INTERFACE)
@@ -61,7 +61,7 @@ target_link_libraries(cppcommon-global-settings
 )
 
 #
-# Configure settings
+# Settings configuration
 #
 
 cppcommon_platform_configure_settings()
@@ -70,17 +70,17 @@ cppcommon_examples_configure_settings()
 cppcommon_performance_configure_settings()
 
 #
-# Create targets
+# Targets creation
 #
 
-file(GLOB_RECURSE CPPCOMMON_CORE_HEADER_FILES "include/*.h"   "source/*.h")
-file(GLOB_RECURSE CPPCOMMON_CORE_INLINE_FILES "include/*.inl" "source/*.inl")
-file(GLOB_RECURSE CPPCOMMON_CORE_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+file(GLOB_RECURSE CPPCOMMON_HEADER_FILES "include/*.h"   "source/*.h")
+file(GLOB_RECURSE CPPCOMMON_INLINE_FILES "include/*.inl" "source/*.inl")
+file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES "include/*.cpp" "source/*.cpp")
 
 add_library(cppcommon
-    ${CPPCOMMON_CORE_HEADER_FILES}
-    ${CPPCOMMON_CORE_INLINE_FILES}
-    ${CPPCOMMON_CORE_SOURCE_FILES}
+    ${CPPCOMMON_HEADER_FILES}
+    ${CPPCOMMON_INLINE_FILES}
+    ${CPPCOMMON_SOURCE_FILES}
 )
 
 add_library(CppCommon::CppCommon ALIAS cppcommon)
@@ -113,7 +113,7 @@ cppcommon_examples_create_targets()
 cppcommon_performance_create_targets()
 
 #
-# Install
+# Install rule configuration
 #
 
 # Keep the core installation self-contained and relocatable.
