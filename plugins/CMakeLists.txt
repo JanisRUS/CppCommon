@@ -6,62 +6,66 @@ target_include_directories(cppcommon-plugins-target-settings
 )
 
 # Build the shared libraries used by the DLL tests and example.
-file(GLOB PLUGIN_DIRECTORIES
+file(GLOB CPPCOMMON_PLUGINS_DIRECTORIES
     LIST_DIRECTORIES true
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/*"
 )
 
-set(CPPCOMMON_PLUGIN_TARGETS)
+set(CPPCOMMON_PLUGINS_TARGETS)
 
-foreach(PLUGIN_NAME IN LISTS PLUGIN_DIRECTORIES)
-    if(NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}")
+foreach(CPPCOMMON_PLUGINS_NAME IN LISTS CPPCOMMON_PLUGINS_DIRECTORIES)
+    if(NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${CPPCOMMON_PLUGINS_NAME}")
         continue()
     endif()
 
-    file(GLOB PLUGIN_HEADER_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}/*.h"
+    file(GLOB CPPCOMMON_PLUGINS_HEADER_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/${CPPCOMMON_PLUGINS_NAME}/*.h"
     )
-    file(GLOB PLUGIN_INLINE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}/*.inl"
+    file(GLOB CPPCOMMON_PLUGINS_INLINE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/${CPPCOMMON_PLUGINS_NAME}/*.inl"
     )
-    file(GLOB PLUGIN_SOURCE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/${PLUGIN_NAME}/*.cpp"
-    )
-
-    set(PLUGIN_TARGET "plugin-${PLUGIN_NAME}")
-
-    add_library(${PLUGIN_TARGET} SHARED
-        ${PLUGIN_HEADER_FILES}
-        ${PLUGIN_INLINE_FILES}
-        ${PLUGIN_SOURCE_FILES}
+    file(GLOB CPPCOMMON_PLUGINS_SOURCE_FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/${CPPCOMMON_PLUGINS_NAME}/*.cpp"
     )
 
-    target_include_directories(${PLUGIN_TARGET}
-        PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../include"
+    set(CPPCOMMON_PLUGINS_TARGET "cppcommon-plugin-${CPPCOMMON_PLUGINS_NAME}")
+
+    add_library(${CPPCOMMON_PLUGINS_TARGET} SHARED
+        ${CPPCOMMON_PLUGINS_HEADER_FILES}
+        ${CPPCOMMON_PLUGINS_INLINE_FILES}
+        ${CPPCOMMON_PLUGINS_SOURCE_FILES}
     )
 
-    target_compile_definitions(${PLUGIN_TARGET}
-        PRIVATE EXPORTS
+    target_include_directories(${CPPCOMMON_PLUGINS_TARGET}
+        PRIVATE
+            "${CMAKE_CURRENT_LIST_DIR}/../include"
     )
 
-    target_link_libraries(${PLUGIN_TARGET}
-        PRIVATE cppcommon-global-settings
+    target_compile_definitions(${CPPCOMMON_PLUGINS_TARGET}
+        PRIVATE
+            EXPORTS
     )
 
-    set_target_properties(${PLUGIN_TARGET} PROPERTIES
+    target_link_libraries(${CPPCOMMON_PLUGINS_TARGET}
+        PRIVATE
+            cppcommon-global-settings
+    )
+
+    set_target_properties(${CPPCOMMON_PLUGINS_TARGET} PROPERTIES
         FOLDER "plugins"
+        OUTPUT_NAME "plugin-${CPPCOMMON_PLUGINS_NAME}"
     )
 
-    list(APPEND CPPCOMMON_PLUGIN_TARGETS ${PLUGIN_TARGET})
+    list(APPEND CPPCOMMON_PLUGINS_TARGETS ${CPPCOMMON_PLUGINS_TARGET})
 endforeach()
 
-set_property(GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS
-    "${CPPCOMMON_PLUGIN_TARGETS}"
+set_property(GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS
+    "${CPPCOMMON_PLUGINS_TARGETS}"
 )
 
 # Install the plugin fixtures together with Core whenever they are built.
-install(TARGETS ${CPPCOMMON_PLUGIN_TARGETS}
+install(TARGETS ${CPPCOMMON_PLUGINS_TARGETS}
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}"
     COMPONENT Core
