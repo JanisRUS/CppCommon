@@ -87,9 +87,10 @@ add_library(cppcommon
 )
 
 add_library(CppCommon::CppCommon ALIAS cppcommon)
-set_target_properties(cppcommon PROPERTIES
-    EXPORT_NAME CppCommon
-    FOLDER      "libraries"
+set_target_properties(cppcommon
+    PROPERTIES
+        EXPORT_NAME CppCommon
+        FOLDER      "libraries"
 )
 
 target_include_directories(cppcommon
