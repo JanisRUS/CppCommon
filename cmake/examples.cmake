@@ -1,3 +1,6 @@
+get_filename_component(CPPCOMMON_EXAMPLES_DIR "${CMAKE_CURRENT_LIST_DIR}/../examples" ABSOLUTE)
+set(CPPCOMMON_EXAMPLES_TARGET_PREFIX "cppcommon-example-")
+
 # @brief    Initialize the examples module
 # @details  Create the examples settings targets
 function(cppcommon_examples_init)
@@ -19,17 +22,17 @@ function(cppcommon_examples_create_targets)
     endif()
 
     file(GLOB example_header_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.h"
+        "${CPPCOMMON_EXAMPLES_DIR}/*.h"
     )
     file(GLOB example_inline_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.inl"
+        "${CPPCOMMON_EXAMPLES_DIR}/*.inl"
     )
     file(GLOB example_source_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
+        "${CPPCOMMON_EXAMPLES_DIR}/*.cpp"
     )
 
     list(FIND example_source_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/examples/system_dll.cpp"
+        "${CPPCOMMON_EXAMPLES_DIR}/system_dll.cpp"
         system_dll_example_index
     )
 
@@ -45,7 +48,7 @@ function(cppcommon_examples_create_targets)
 
     foreach(example_source_file IN LISTS example_source_files)
         get_filename_component(example_name "${example_source_file}" NAME_WE)
-        set(example_target "cppcommon-example-${example_name}")
+        set(example_target "${CPPCOMMON_EXAMPLES_TARGET_PREFIX}${example_name}")
 
         add_executable(${example_target}
             ${example_header_files}
@@ -82,12 +85,12 @@ function(cppcommon_examples_install)
     endif()
 
     file(GLOB example_source_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
+        "${CPPCOMMON_EXAMPLES_DIR}/*.cpp"
     )
 
     foreach(example_source_file IN LISTS example_source_files)
         get_filename_component(example_name "${example_source_file}" NAME_WE)
-        set(example_target "cppcommon-example-${example_name}")
+        set(example_target "${CPPCOMMON_EXAMPLES_TARGET_PREFIX}${example_name}")
 
         install(TARGETS ${example_target}
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
