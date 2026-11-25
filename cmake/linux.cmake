@@ -25,9 +25,10 @@ function(cppcommon_platform_init)
         mark_as_advanced(CPPCOMMON_BFD_INCLUDE_DIR CPPCOMMON_BFD_LIBRARY)
 
         add_library(cppcommon-platform-bfd UNKNOWN IMPORTED)
-        set_target_properties(cppcommon-platform-bfd PROPERTIES
-            IMPORTED_LOCATION "${CPPCOMMON_BFD_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_BFD_INCLUDE_DIR}"
+        set_target_properties(cppcommon-platform-bfd
+            PROPERTIES
+                IMPORTED_LOCATION             "${CPPCOMMON_BFD_LIBRARY}"
+                INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_BFD_INCLUDE_DIR}"
         )
     endif()
 endfunction()
