@@ -1,3 +1,5 @@
+set(CPPCOMMON_TESTS_DIR "${CMAKE_CURRENT_LIST_DIR}/../tests")
+
 # @brief    Initialize the tests module
 # @details  Create the tests settings targets and find required dependencies
 function(cppcommon_tests_init)
@@ -28,13 +30,13 @@ function(cppcommon_tests_create_targets)
     get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
     file(GLOB tests_header_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
+        "${CPPCOMMON_TESTS_DIR}/*.h"
     )
     file(GLOB tests_inline_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
+        "${CPPCOMMON_TESTS_DIR}/*.inl"
     )
     file(GLOB tests_source_files
-        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
+        "${CPPCOMMON_TESTS_DIR}/*.cpp"
     )
 
     add_executable(cppcommon-tests
