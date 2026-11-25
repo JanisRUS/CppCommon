@@ -2,8 +2,7 @@ set(CPPCOMMON_PERFORMANCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../performance")
 set(CPPCOMMON_PERFORMANCE_TARGET_PREFIX "cppcommon-performance-")
 
 # @brief    Initialize the performance module
-# @details  Create the performance settings targets
-# @note     Settings are currently empty
+# @details  Create the performance settings targets and initialize the target list
 function(cppcommon_performance_init)
     add_library(cppcommon-performance-global-settings INTERFACE)
     add_library(cppcommon-performance-target-settings INTERFACE)
@@ -12,8 +11,7 @@ function(cppcommon_performance_init)
 endfunction()
 
 # @brief    Configure performance module settings
-# @details  Configure usage requirements shared by performance benchmarks
-# @note     Settings are currently empty
+# @details  No additional performance-specific settings are required
 function(cppcommon_performance_configure_settings)
     if(NOT CPPCOMMON_BUILD_PERFORMANCE)
         return()
@@ -56,8 +54,8 @@ function(cppcommon_performance_create_targets)
     endforeach()
 endfunction()
 
-# @brief    Install performance artifacts
-# @details  Register benchmark executables in the Performance component
+# @brief    Configure performance module installation
+# @details  Register the created benchmark targets in the Performance component
 function(cppcommon_performance_install)
     if(NOT CPPCOMMON_BUILD_PERFORMANCE)
         return()
