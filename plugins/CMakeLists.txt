@@ -48,7 +48,7 @@ foreach(CPPCOMMON_PLUGINS_NAME IN LISTS CPPCOMMON_PLUGINS_DIRECTORIES)
 
     target_include_directories(${CPPCOMMON_PLUGINS_TARGET}
         PRIVATE
-            "${CMAKE_CURRENT_LIST_DIR}/../include"
+            "${CPPCOMMON_INCLUDE_DIR}"
     )
 
     target_compile_definitions(${CPPCOMMON_PLUGINS_TARGET}
