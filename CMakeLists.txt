@@ -117,14 +117,16 @@ cppcommon_performance_create_targets()
 #
 
 # Keep the core installation self-contained and relocatable.
-install(TARGETS cppcommon
-    EXPORT CppCommonTargets
+install(
+    TARGETS cppcommon
+    EXPORT  CppCommonTargets
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
     ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
 )
 
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+install(
+    DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
     FILES_MATCHING
@@ -138,14 +140,16 @@ configure_package_config_file(
     INSTALL_DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
 )
 
-install(EXPORT CppCommonTargets
+install(
+    EXPORT      CppCommonTargets
     FILE        CppCommonTargets.cmake
     NAMESPACE   CppCommon::
     DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
     COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
 )
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
+install(
+    FILES       "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
     DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
     COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
 )
