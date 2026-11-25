@@ -73,9 +73,9 @@ cppcommon_performance_configure_settings()
 # Targets creation
 #
 
-file(GLOB_RECURSE CPPCOMMON_HEADER_FILES "include/*.h"   "source/*.h")
-file(GLOB_RECURSE CPPCOMMON_INLINE_FILES "include/*.inl" "source/*.inl")
-file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+file(GLOB_RECURSE CPPCOMMON_HEADER_FILES "include/*.h")
+file(GLOB_RECURSE CPPCOMMON_INLINE_FILES "include/*.inl")
+file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES "source/*.cpp")
 
 add_library(cppcommon
     ${CPPCOMMON_HEADER_FILES}
