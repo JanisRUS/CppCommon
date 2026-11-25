@@ -18,57 +18,58 @@ function(cppcommon_examples_create_targets)
         return()
     endif()
 
-    file(GLOB EXAMPLE_HEADER_FILES
+    file(GLOB example_header_files
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.h"
     )
-    file(GLOB EXAMPLE_INLINE_FILES
+    file(GLOB example_inline_files
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.inl"
     )
-    file(GLOB EXAMPLE_SOURCE_FILES
+    file(GLOB example_source_files
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
     )
 
-    list(FIND EXAMPLE_SOURCE_FILES
+    list(FIND example_source_files
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/system_dll.cpp"
-        SYSTEM_DLL_EXAMPLE_INDEX
+        system_dll_example_index
     )
 
-    if(NOT SYSTEM_DLL_EXAMPLE_INDEX EQUAL -1)
-        plugins_check()
-        get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+    if(NOT system_dll_example_index EQUAL -1)
+        cppcommon_plugins_check()
+        get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
-        set_target_properties(${PLUGIN_TARGETS} PROPERTIES
+        set_target_properties(${plugin_targets} PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
     endif()
 
-    foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
-        get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
-        set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
+    foreach(example_source_file IN LISTS example_source_files)
+        get_filename_component(example_name "${example_source_file}" NAME_WE)
+        set(example_target "cppcommon-example-${example_name}")
 
-        add_executable(${EXAMPLE_TARGET}
-            ${EXAMPLE_HEADER_FILES}
-            ${EXAMPLE_INLINE_FILES}
-            "${EXAMPLE_SOURCE_FILE}"
+        add_executable(${example_target}
+            ${example_header_files}
+            ${example_inline_files}
+            "${example_source_file}"
         )
 
-        target_link_libraries(${EXAMPLE_TARGET}
+        target_link_libraries(${example_target}
             PRIVATE
                 cppcommon-global-settings
                 cppcommon
         )
 
-        set_target_properties(${EXAMPLE_TARGET} PROPERTIES
+        set_target_properties(${example_target} PROPERTIES
             FOLDER "examples"
         )
 
-        if(EXAMPLE_NAME STREQUAL "system_dll")
-            target_link_libraries(${EXAMPLE_TARGET}
-                PRIVATE cppcommon-plugins-target-settings
+        if(example_name STREQUAL "system_dll")
+            target_link_libraries(${example_target}
+                PRIVATE
+                    cppcommon-plugins-target-settings
             )
 
-            add_dependencies(${EXAMPLE_TARGET} ${PLUGIN_TARGETS})
+            add_dependencies(${example_target} ${plugin_targets})
         endif()
     endforeach()
 endfunction()
@@ -80,21 +81,21 @@ function(cppcommon_examples_install)
         return()
     endif()
 
-    file(GLOB EXAMPLE_SOURCE_FILES
+    file(GLOB example_source_files
         "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.cpp"
     )
 
-    foreach(EXAMPLE_SOURCE_FILE IN LISTS EXAMPLE_SOURCE_FILES)
-        get_filename_component(EXAMPLE_NAME "${EXAMPLE_SOURCE_FILE}" NAME_WE)
-        set(EXAMPLE_TARGET "cppcommon-example-${EXAMPLE_NAME}")
+    foreach(example_source_file IN LISTS example_source_files)
+        get_filename_component(example_name "${example_source_file}" NAME_WE)
+        set(example_target "cppcommon-example-${example_name}")
 
-        install(TARGETS ${EXAMPLE_TARGET}
+        install(TARGETS ${example_target}
             RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
             COMPONENT Examples
         )
 
         if(MSVC)
-            install(FILES "$<TARGET_PDB_FILE:${EXAMPLE_TARGET}>"
+            install(FILES "$<TARGET_PDB_FILE:${example_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
                 COMPONENT Examples
                 OPTIONAL
