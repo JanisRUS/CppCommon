@@ -1,6 +1,6 @@
-add_library(cppcommon_plugins_target_settings INTERFACE)
+add_library(cppcommon-plugins-target-settings INTERFACE)
 
-target_include_directories(cppcommon_plugins_target_settings
+target_include_directories(cppcommon-plugins-target-settings
     INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}"
 )
@@ -46,7 +46,7 @@ foreach(PLUGIN_NAME IN LISTS PLUGIN_DIRECTORIES)
     )
 
     target_link_libraries(${PLUGIN_TARGET}
-        PRIVATE cppcommon_global_settings
+        PRIVATE cppcommon-global-settings
     )
 
     set_target_properties(${PLUGIN_TARGET} PROPERTIES

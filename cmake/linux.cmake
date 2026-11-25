@@ -1,7 +1,7 @@
 # @brief    Initialize Linux platform support
 # @details  Discover Linux system libraries and create platform settings targets
-function(platform_init)
-    add_library(cppcommon_platform_global_settings INTERFACE)
+function(cppcommon_platform_init)
+    add_library(cppcommon-platform-global-settings INTERFACE)
     add_library(cppcommon_platform_target_settings INTERFACE)
 
     find_package(PkgConfig REQUIRED)
@@ -25,25 +25,25 @@ endfunction()
 
 # @brief    Configure Linux platform settings
 # @details  Populate platform settings targets with compiler options and dependencies
-function(platform_configure_settings)
+function(cppcommon_platform_configure_settings)
     # Configure Clang compiler settings
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(cppcommon_platform_global_settings
+        target_compile_options(cppcommon-platform-global-settings
             INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
         )
-        target_link_options(cppcommon_platform_global_settings
+        target_link_options(cppcommon-platform-global-settings
             INTERFACE -stdlib=libc++
         )
     endif()
 
     # Configure common compiler warnings
-    target_compile_options(cppcommon_platform_global_settings
+    target_compile_options(cppcommon-platform-global-settings
         INTERFACE -Wall -Werror -Wshadow -pedantic
     )
 
     # Configure GCC compiler warnings
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(cppcommon_platform_global_settings
+        target_compile_options(cppcommon-platform-global-settings
             INTERFACE
                 -Wno-maybe-uninitialized
                 -Wno-overflow
@@ -52,7 +52,7 @@ function(platform_configure_settings)
         )
     endif()
 
-    target_compile_definitions(cppcommon_platform_global_settings
+    target_compile_definitions(cppcommon-platform-global-settings
         INTERFACE
             LIBUUID_SUPPORT
             LIBDL_SUPPORT
@@ -67,7 +67,7 @@ function(platform_configure_settings)
     )
 
     if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
-        target_compile_definitions(cppcommon_platform_global_settings
+        target_compile_definitions(cppcommon-platform-global-settings
             INTERFACE LIBBFD_SUPPORT
         )
         target_link_libraries(cppcommon_platform_target_settings
@@ -78,12 +78,12 @@ endfunction()
 
 # @brief    Create additional Linux platform targets
 # @details  No additional platform targets are required
-function(platform_create_targets)
+function(cppcommon_platform_create_targets)
 endfunction()
 
 # @brief    Configure Linux platform installation
 # @details  Preserve the system link dependencies of an installed static library
-function(platform_install)
+function(cppcommon_platform_install)
     target_link_libraries(cppcommon
         INTERFACE
             "$<INSTALL_INTERFACE:$<LINK_ONLY:PkgConfig::LibUUID>>"

@@ -3,18 +3,18 @@
 #           If not, it adds the plugins subdirectory.
 #           Fails if plugin targets are still unavailable.
 function(plugins_check)
-    get_property(_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+    get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
 
-    if(NOT _plugin_targets)
+    if(NOT plugin_targets)
         add_subdirectory(
             "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../plugins"
             "${CMAKE_CURRENT_BINARY_DIR}/plugins"
         )
 
-        get_property(_plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+        get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
     endif()
 
-    if(NOT _plugin_targets)
+    if(NOT plugin_targets)
         message(FATAL_ERROR "CppCommon plugins were not created")
     endif()
 endfunction()

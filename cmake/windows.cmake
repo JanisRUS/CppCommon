@@ -1,7 +1,7 @@
 # @brief    Initialize Windows platform support
 # @details  Create platform settings targets and discover enabled optional dependencies
-function(platform_init)
-    add_library(cppcommon_platform_global_settings INTERFACE)
+function(cppcommon_platform_init)
+    add_library(cppcommon-platform-global-settings INTERFACE)
     add_library(cppcommon_platform_target_settings INTERFACE)
 
     find_path(CPPCOMMON_RPC_INCLUDE_DIR
@@ -46,17 +46,17 @@ endfunction()
 
 # @brief    Configure Windows platform settings
 # @details  Populate platform settings targets with compiler options and dependencies
-function(platform_configure_settings)
+function(cppcommon_platform_configure_settings)
     set(_platform_compile_definitions)
     set(_platform_compile_options)
     set(_platform_link_options)
 
     # Configure Clang compiler settings
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(cppcommon_platform_global_settings
+        target_compile_options(cppcommon-platform-global-settings
             INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
         )
-        target_link_options(cppcommon_platform_global_settings
+        target_link_options(cppcommon-platform-global-settings
             INTERFACE -stdlib=libc++
         )
     endif()
@@ -140,19 +140,19 @@ function(platform_configure_settings)
     endif()
 
     if(_platform_compile_definitions)
-        target_compile_definitions(cppcommon_platform_global_settings
+        target_compile_definitions(cppcommon-platform-global-settings
             INTERFACE ${_platform_compile_definitions}
         )
     endif()
 
     if(_platform_compile_options)
-        target_compile_options(cppcommon_platform_global_settings
+        target_compile_options(cppcommon-platform-global-settings
             INTERFACE ${_platform_compile_options}
         )
     endif()
 
     if(_platform_link_options)
-        target_link_options(cppcommon_platform_global_settings
+        target_link_options(cppcommon-platform-global-settings
             INTERFACE ${_platform_link_options}
         )
     endif()
@@ -189,10 +189,10 @@ endfunction()
 
 # @brief    Create additional Windows platform targets
 # @details  No additional platform targets are required
-function(platform_create_targets)
+function(cppcommon_platform_create_targets)
 endfunction()
 
 # @brief    Configure Windows platform installation
 # @details  No platform-specific installation entries are required
-function(platform_install)
+function(cppcommon_platform_install)
 endfunction()

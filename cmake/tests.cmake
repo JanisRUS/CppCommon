@@ -1,8 +1,8 @@
 # @brief    Initialize the tests module
 # @details  Create the tests settings targets and find required dependencies
-function(tests_init)
-    add_library(cppcommon_tests_global_settings INTERFACE)
-    add_library(cppcommon_tests_target_settings INTERFACE)
+function(cppcommon_tests_init)
+    add_library(cppcommon-tests-global-settings INTERFACE)
+    add_library(cppcommon-tests-target-settings INTERFACE)
 
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
@@ -13,13 +13,13 @@ endfunction()
 
 # @brief    Configure tests settings
 # @details  Configure usage requirements shared by tests
-function(tests_configure_settings)
+function(cppcommon_tests_configure_settings)
     # No additional test-specific settings are required yet
 endfunction()
 
 # @brief    Create test-related targets and rules
 # @details  Create the test executable, its plugin fixtures, and register it with CTest
-function(tests_create_targets)
+function(cppcommon_tests_create_targets)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
@@ -51,8 +51,8 @@ function(tests_create_targets)
 
     target_link_libraries(cppcommon-tests
         PRIVATE
-            cppcommon_global_settings
-            cppcommon_plugins_target_settings
+            cppcommon-global-settings
+            cppcommon-plugins-target-settings
             cppcommon
             Catch2::Catch2WithMain
     )
@@ -65,7 +65,7 @@ endfunction()
 
 # @brief    Install test artifacts
 # @details  Register the test executable in the Tests component
-function(tests_install)
+function(cppcommon_tests_install)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()

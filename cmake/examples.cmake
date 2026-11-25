@@ -1,19 +1,19 @@
 # @brief    Initialize the examples module
 # @details  Create the examples settings targets
-function(examples_init)
-    add_library(cppcommon_examples_global_settings INTERFACE)
-    add_library(cppcommon_examples_target_settings INTERFACE)
+function(cppcommon_examples_init)
+    add_library(cppcommon-examples-global-settings INTERFACE)
+    add_library(cppcommon-examples-target-settings INTERFACE)
 endfunction()
 
 # @brief    Configure examples settings
 # @details  Configure usage requirements shared by examples
-function(examples_configure_settings)
+function(cppcommon_examples_configure_settings)
     # No additional example-specific settings are required yet
 endfunction()
 
 # @brief    Create example targets and rules
 # @details  Create example executables and connect the DLL fixtures used by system_dll
-function(examples_create_targets)
+function(cppcommon_examples_create_targets)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
         return()
     endif()
@@ -55,7 +55,7 @@ function(examples_create_targets)
 
         target_link_libraries(${EXAMPLE_TARGET}
             PRIVATE
-                cppcommon_global_settings
+                cppcommon-global-settings
                 cppcommon
         )
 
@@ -65,7 +65,7 @@ function(examples_create_targets)
 
         if(EXAMPLE_NAME STREQUAL "system_dll")
             target_link_libraries(${EXAMPLE_TARGET}
-                PRIVATE cppcommon_plugins_target_settings
+                PRIVATE cppcommon-plugins-target-settings
             )
 
             add_dependencies(${EXAMPLE_TARGET} ${PLUGIN_TARGETS})
@@ -75,7 +75,7 @@ endfunction()
 
 # @brief    Install example artifacts
 # @details  Register example executables in the Examples component
-function(examples_install)
+function(cppcommon_examples_install)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
         return()
     endif()

@@ -1,12 +1,12 @@
+#
+# Common project options
+#
+
 cmake_minimum_required(VERSION 3.20)
 project(cppcommon)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-
-#
-# Project options
-#
 
 option(CPPCOMMON_ENABLE_TESTING            "Enable testing support"                    OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
@@ -15,11 +15,11 @@ option(CPPCOMMON_BUILD_DOCUMENTATION       "Build documentation"                
 option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
 option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integration"   OFF)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD   23)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 #
-# Module selection
+# Modules connection
 #
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -38,39 +38,39 @@ include(cmake/examples.cmake)
 include(cmake/performance.cmake)
 
 #
-# 1. Initialization
+# Initialization
 #
 
-add_library(cppcommon_global_settings INTERFACE)
+add_library(cppcommon-global-settings INTERFACE)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 
-platform_init()
-tests_init()
-examples_init()
-performance_init()
+cppcommon_platform_init()
+cppcommon_tests_init()
+cppcommon_examples_init()
+cppcommon_performance_init()
 
-target_link_libraries(cppcommon_global_settings
+target_link_libraries(cppcommon-global-settings
     INTERFACE
-        cppcommon_platform_global_settings
-        cppcommon_tests_global_settings
-        cppcommon_examples_global_settings
-        cppcommon_performance_global_settings
+        cppcommon-platform-global-settings
+        cppcommon-tests-global-settings
+        cppcommon-examples-global-settings
+        cppcommon-performance-global-settings
 )
 
 #
-# 2. Configure settings
+# Settings configuration
 #
 
-platform_configure_settings()
-tests_configure_settings()
-examples_configure_settings()
-performance_configure_settings()
+cppcommon_platform_configure_settings()
+cppcommon_tests_configure_settings()
+cppcommon_examples_configure_settings()
+cppcommon_performance_configure_settings()
 
 #
-# 3. Create targets
+# Targets creation
 #
 
 file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h"   "source/*.h")
@@ -103,17 +103,17 @@ target_link_libraries(cppcommon
         Threads::Threads
         fmt::fmt
     PRIVATE
-        "$<BUILD_INTERFACE:cppcommon_global_settings>"
+        "$<BUILD_INTERFACE:cppcommon-global-settings>"
         "$<BUILD_INTERFACE:cppcommon_platform_target_settings>"
 )
 
-platform_create_targets()
-tests_create_targets()
-examples_create_targets()
-performance_create_targets()
+cppcommon_platform_create_targets()
+cppcommon_tests_create_targets()
+cppcommon_examples_create_targets()
+cppcommon_performance_create_targets()
 
 #
-# 4. Install
+# Install rule configuration
 #
 
 # Keep the core installation self-contained and relocatable.
@@ -132,30 +132,30 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
         PATTERN "*.inl"
 )
 
-set(_cppcommon_package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
+set(cppcommon_package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppCommonConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
-    INSTALL_DESTINATION "${_cppcommon_package_dir}"
+    INSTALL_DESTINATION "${cppcommon_package_dir}"
 )
 
 install(EXPORT CppCommonTargets
     FILE CppCommonTargets.cmake
     NAMESPACE CppCommon::
-    DESTINATION "${_cppcommon_package_dir}"
+    DESTINATION "${cppcommon_package_dir}"
     COMPONENT Core
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
-    DESTINATION "${_cppcommon_package_dir}"
+    DESTINATION "${cppcommon_package_dir}"
     COMPONENT Core
 )
 
-platform_install()
-tests_install()
-examples_install()
-performance_install()
+cppcommon_platform_install()
+cppcommon_tests_install()
+cppcommon_examples_install()
+cppcommon_performance_install()
 
 #
 # Documentation

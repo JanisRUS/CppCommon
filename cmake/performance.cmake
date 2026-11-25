@@ -1,15 +1,15 @@
 # @brief    Initialize the performance module
 # @details  Creates settings provided by module
 # @note     Settings are empty now
-function(performance_init)
-    add_library(cppcommon_performance_global_settings INTERFACE)
+function(cppcommon_performance_init)
+    add_library(cppcommon-performance-global-settings INTERFACE)
     add_library(cppcommon_performance_target_settings INTERFACE)
 endfunction()
 
 # @brief    Configure performance module settings
 # @details  Configures settings provided by module
 # @note     Empty now
-function(performance_configure_settings)
+function(cppcommon_performance_configure_settings)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
     endif()
@@ -17,7 +17,7 @@ endfunction()
 
 # @brief    Create performance module targets
 # @details  Creates module targets
-function(performance_create_targets)
+function(cppcommon_performance_create_targets)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
     endif()
@@ -42,7 +42,7 @@ function(performance_create_targets)
 
         target_link_libraries(${_benchmark_target}
             PRIVATE
-                cppcommon_global_settings
+                cppcommon-global-settings
                 cppcommon
                 cppbenchmark
         )
@@ -59,7 +59,7 @@ endfunction()
 
 # @brief    Install performance artifacts
 # @details  Register benchmark executables in the Performance component
-function(performance_install)
+function(cppcommon_performance_install)
     if(NOT CPPCOMMON_BUILD_BENCHMARKS)
         return()
     endif()
