@@ -1,5 +1,6 @@
-set(CPPCOMMON_EXAMPLES_DIR "${CMAKE_CURRENT_LIST_DIR}/../examples")
-set(CPPCOMMON_EXAMPLES_TARGET_PREFIX "cppcommon-example-")
+set(CPPCOMMON_EXAMPLES_DIR               "${CMAKE_CURRENT_LIST_DIR}/../examples")
+set(CPPCOMMON_EXAMPLES_TARGET_PREFIX     "cppcommon-example-")
+set(CPPCOMMON_EXAMPLES_INSTALL_COMPONENT "Examples")
 
 # @brief    Initialize the examples module
 # @details  Create the examples settings targets and initialize the target list
@@ -30,14 +31,17 @@ function(cppcommon_examples_create_targets)
         cppcommon_plugins_check()
         get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
-        set_target_properties(${plugin_targets} PROPERTIES
-            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        set_target_properties(${plugin_targets}
+            PROPERTIES
+                LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         )
     endif()
 
+    cmake_path(GET CPPCOMMON_EXAMPLES_DIR FILENAME examples_folder)
+
     foreach(example_source_file IN LISTS example_source_files)
-        get_filename_component(example_name "${example_source_file}" NAME_WE)
+        cmake_path(GET example_source_file STEM example_name)
         set(example_target "${CPPCOMMON_EXAMPLES_TARGET_PREFIX}${example_name}")
 
         add_executable(${example_target}
@@ -54,8 +58,9 @@ function(cppcommon_examples_create_targets)
                 cppcommon
         )
 
-        set_target_properties(${example_target} PROPERTIES
-            FOLDER "examples"
+        set_target_properties(${example_target}
+            PROPERTIES
+                FOLDER "${examples_folder}"
         )
 
         if(example_name STREQUAL "system_dll")
@@ -78,16 +83,18 @@ function(cppcommon_examples_install)
         return()
     endif()
 
-    install(TARGETS ${example_targets}
+    install(
+        TARGETS ${example_targets}
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        COMPONENT Examples
+        COMPONENT "${CPPCOMMON_EXAMPLES_INSTALL_COMPONENT}"
     )
 
     if(MSVC)
         foreach(example_target IN LISTS example_targets)
-            install(FILES "$<TARGET_PDB_FILE:${example_target}>"
+            install(
+                FILES       "$<TARGET_PDB_FILE:${example_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
-                COMPONENT Examples
+                COMPONENT   "${CPPCOMMON_EXAMPLES_INSTALL_COMPONENT}"
                 OPTIONAL
             )
         endforeach()
