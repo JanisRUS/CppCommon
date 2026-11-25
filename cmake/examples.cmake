@@ -72,10 +72,6 @@ endfunction()
 # @brief    Configure examples module installation
 # @details  Register the created example targets in the Examples component
 function(cppcommon_examples_install)
-    if(NOT CPPCOMMON_BUILD_EXAMPLES)
-        return()
-    endif()
-
     get_property(example_targets GLOBAL PROPERTY CPPCOMMON_EXAMPLES_TARGETS)
 
     if(NOT example_targets)
