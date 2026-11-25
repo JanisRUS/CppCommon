@@ -1,3 +1,6 @@
+set(CPPCOMMON_PLUGINS_DIR "${CMAKE_CURRENT_LIST_DIR}/../plugins")
+set(CPPCOMMON_PLUGINS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/plugins")
+
 # @brief    Check whether plugin targets exist
 # @details  Checks whether CPPCOMMON_PLUGINS_TARGETS is populated.
 #           If not, it adds the plugins subdirectory.
@@ -7,8 +10,8 @@ function(cppcommon_plugins_check)
 
     if(NOT plugin_targets)
         add_subdirectory(
-            "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../plugins"
-            "${CMAKE_CURRENT_BINARY_DIR}/plugins"
+            "${CPPCOMMON_PLUGINS_DIR}"
+            "${CPPCOMMON_PLUGINS_BINARY_DIR}"
         )
 
         get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
