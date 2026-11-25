@@ -1,5 +1,6 @@
-set(CPPCOMMON_PERFORMANCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../performance")
-set(CPPCOMMON_PERFORMANCE_TARGET_PREFIX "cppcommon-performance-")
+set(CPPCOMMON_PERFORMANCE_DIR               "${CMAKE_CURRENT_LIST_DIR}/../performance")
+set(CPPCOMMON_PERFORMANCE_TARGET_PREFIX     "cppcommon-performance-")
+set(CPPCOMMON_PERFORMANCE_INSTALL_COMPONENT "Performance")
 
 # @brief    Initialize the performance module
 # @details  Create the performance settings targets and initialize the target list
@@ -26,8 +27,10 @@ function(cppcommon_performance_create_targets)
     file(GLOB performance_inline_files "${CPPCOMMON_PERFORMANCE_DIR}/*.inl")
     file(GLOB performance_source_files "${CPPCOMMON_PERFORMANCE_DIR}/*.cpp")
 
+    cmake_path(GET CPPCOMMON_PERFORMANCE_DIR FILENAME performance_folder)
+
     foreach(performance_source_file IN LISTS performance_source_files)
-        get_filename_component(performance_name "${performance_source_file}" NAME_WE)
+        cmake_path(GET performance_source_file STEM performance_name)
         set(performance_target "${CPPCOMMON_PERFORMANCE_TARGET_PREFIX}${performance_name}")
 
         add_executable(${performance_target}
@@ -45,8 +48,9 @@ function(cppcommon_performance_create_targets)
                 cppbenchmark
         )
 
-        set_target_properties(${performance_target} PROPERTIES
-            FOLDER "performance"
+        set_target_properties(${performance_target}
+            PROPERTIES
+                FOLDER "${performance_folder}"
         )
     endforeach()
 endfunction()
@@ -60,16 +64,18 @@ function(cppcommon_performance_install)
         return()
     endif()
 
-    install(TARGETS ${performance_targets}
+    install(
+        TARGETS ${performance_targets}
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        COMPONENT Performance
+        COMPONENT "${CPPCOMMON_PERFORMANCE_INSTALL_COMPONENT}"
     )
 
     if(MSVC)
         foreach(performance_target IN LISTS performance_targets)
-            install(FILES "$<TARGET_PDB_FILE:${performance_target}>"
+            install(
+                FILES       "$<TARGET_PDB_FILE:${performance_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
-                COMPONENT Performance
+                COMPONENT   "${CPPCOMMON_PERFORMANCE_INSTALL_COMPONENT}"
                 OPTIONAL
             )
         endforeach()
