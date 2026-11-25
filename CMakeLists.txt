@@ -18,6 +18,8 @@ option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integrat
 set(CMAKE_CXX_STANDARD   23)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+set(CPPCOMMON_INCLUDE_DIR       "${CMAKE_CURRENT_LIST_DIR}/include")
+set(CPPCOMMON_SOURCE_DIR        "${CMAKE_CURRENT_LIST_DIR}/source")
 set(CPPCOMMON_INSTALL_COMPONENT "Core")
 set(CPPCOMMON_PACKAGE_DIR       "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
 
@@ -76,9 +78,9 @@ cppcommon_performance_configure_settings()
 # Targets creation
 #
 
-file(GLOB_RECURSE CPPCOMMON_HEADER_FILES "include/*.h")
-file(GLOB_RECURSE CPPCOMMON_INLINE_FILES "include/*.inl")
-file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES "source/*.cpp")
+file(GLOB_RECURSE CPPCOMMON_HEADER_FILES "${CPPCOMMON_INCLUDE_DIR}/*.h")
+file(GLOB_RECURSE CPPCOMMON_INLINE_FILES "${CPPCOMMON_INCLUDE_DIR}/*.inl")
+file(GLOB_RECURSE CPPCOMMON_SOURCE_FILES "${CPPCOMMON_SOURCE_DIR}/*.cpp")
 
 add_library(cppcommon
     ${CPPCOMMON_HEADER_FILES}
@@ -95,7 +97,7 @@ set_target_properties(cppcommon
 
 target_include_directories(cppcommon
     PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${CPPCOMMON_INCLUDE_DIR}>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
@@ -127,7 +129,7 @@ install(
 )
 
 install(
-    DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+    DIRECTORY   "${CPPCOMMON_INCLUDE_DIR}/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
     FILES_MATCHING
