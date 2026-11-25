@@ -1,4 +1,4 @@
-set(CPPCOMMON_PLUGINS_DIR "${CMAKE_CURRENT_LIST_DIR}/../plugins")
+set(CPPCOMMON_PLUGINS_DIR        "${CMAKE_CURRENT_LIST_DIR}/../plugins")
 set(CPPCOMMON_PLUGINS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/plugins")
 
 # @brief    Check whether plugin targets exist
