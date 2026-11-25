@@ -8,11 +8,8 @@ function(cppcommon_platform_init)
     pkg_check_modules(LibUUID REQUIRED IMPORTED_TARGET uuid)
 
     find_library(CPPCOMMON_RT_LIBRARY
-
         NAMES rt
-
         REQUIRED
-
     )
     mark_as_advanced(CPPCOMMON_RT_LIBRARY)
 
