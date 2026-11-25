@@ -13,9 +13,6 @@ endfunction()
 # @brief    Configure performance module settings
 # @details  No additional performance-specific settings are required
 function(cppcommon_performance_configure_settings)
-    if(NOT CPPCOMMON_BUILD_PERFORMANCE)
-        return()
-    endif()
 endfunction()
 
 # @brief    Create performance module targets
@@ -57,10 +54,6 @@ endfunction()
 # @brief    Configure performance module installation
 # @details  Register the created benchmark targets in the Performance component
 function(cppcommon_performance_install)
-    if(NOT CPPCOMMON_BUILD_PERFORMANCE)
-        return()
-    endif()
-
     get_property(performance_targets GLOBAL PROPERTY CPPCOMMON_PERFORMANCE_TARGETS)
 
     if(NOT performance_targets)
