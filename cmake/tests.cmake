@@ -6,6 +6,8 @@ function(cppcommon_tests_init)
     add_library(cppcommon-tests-global-settings INTERFACE)
     add_library(cppcommon-tests-target-settings INTERFACE)
 
+    set_property(GLOBAL PROPERTY CPPCOMMON_TESTS_TARGETS "")
+
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
     endif()
@@ -45,6 +47,8 @@ function(cppcommon_tests_create_targets)
         ${tests_source_files}
     )
 
+    set_property(GLOBAL APPEND PROPERTY CPPCOMMON_TESTS_TARGETS cppcommon-tests)
+
     add_dependencies(cppcommon-tests ${plugin_targets})
 
     set_target_properties(cppcommon-tests PROPERTIES
@@ -72,16 +76,24 @@ function(cppcommon_tests_install)
         return()
     endif()
 
-    install(TARGETS cppcommon-tests
+    get_property(tests_targets GLOBAL PROPERTY CPPCOMMON_TESTS_TARGETS)
+
+    if(NOT tests_targets)
+        return()
+    endif()
+
+    install(TARGETS ${tests_targets}
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
         COMPONENT Tests
     )
 
     if(MSVC)
-        install(FILES "$<TARGET_PDB_FILE:cppcommon-tests>"
-            DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            COMPONENT Tests
-            OPTIONAL
-        )
+        foreach(tests_target IN LISTS tests_targets)
+            install(FILES "$<TARGET_PDB_FILE:${tests_target}>"
+                DESTINATION "${CMAKE_INSTALL_BINDIR}"
+                COMPONENT Tests
+                OPTIONAL
+            )
+        endforeach()
     endif()
 endfunction()
