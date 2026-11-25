@@ -18,8 +18,9 @@ function(cppcommon_platform_init)
         mark_as_advanced(CPPCOMMON_DBGHELP_LIBRARY)
 
         add_library(cppcommon-platform-dbghelp UNKNOWN IMPORTED)
-        set_target_properties(cppcommon-platform-dbghelp PROPERTIES
-            IMPORTED_LOCATION "${CPPCOMMON_DBGHELP_LIBRARY}"
+        set_target_properties(cppcommon-platform-dbghelp
+            PROPERTIES
+                IMPORTED_LOCATION "${CPPCOMMON_DBGHELP_LIBRARY}"
         )
     endif()
 
@@ -37,9 +38,10 @@ function(cppcommon_platform_init)
         mark_as_advanced(CPPCOMMON_VLD_INCLUDE_DIR CPPCOMMON_VLD_LIBRARY)
 
         add_library(cppcommon-platform-vld UNKNOWN IMPORTED)
-        set_target_properties(cppcommon-platform-vld PROPERTIES
-            IMPORTED_LOCATION "${CPPCOMMON_VLD_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_VLD_INCLUDE_DIR}"
+        set_target_properties(cppcommon-platform-vld
+            PROPERTIES
+                IMPORTED_LOCATION             "${CPPCOMMON_VLD_LIBRARY}"
+                INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_VLD_INCLUDE_DIR}"
         )
     endif()
 endfunction()
