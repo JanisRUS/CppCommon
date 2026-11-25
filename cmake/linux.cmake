@@ -2,7 +2,7 @@
 # @details  Discover Linux system libraries and create platform settings targets
 function(cppcommon_platform_init)
     add_library(cppcommon-platform-global-settings INTERFACE)
-    add_library(cppcommon_platform_target_settings INTERFACE)
+    add_library(cppcommon-platform-target-settings INTERFACE)
 
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LibUUID REQUIRED IMPORTED_TARGET uuid)
@@ -15,8 +15,8 @@ function(cppcommon_platform_init)
         find_library(CPPCOMMON_BFD_LIBRARY NAMES bfd REQUIRED)
         mark_as_advanced(CPPCOMMON_BFD_INCLUDE_DIR CPPCOMMON_BFD_LIBRARY)
 
-        add_library(cppcommon_platform_bfd UNKNOWN IMPORTED)
-        set_target_properties(cppcommon_platform_bfd PROPERTIES
+        add_library(cppcommon-platform-bfd UNKNOWN IMPORTED)
+        set_target_properties(cppcommon-platform-bfd PROPERTIES
             IMPORTED_LOCATION "${CPPCOMMON_BFD_LIBRARY}"
             INTERFACE_INCLUDE_DIRECTORIES "${CPPCOMMON_BFD_INCLUDE_DIR}"
         )
@@ -29,16 +29,19 @@ function(cppcommon_platform_configure_settings)
     # Configure Clang compiler settings
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(cppcommon-platform-global-settings
-            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
+            INTERFACE
+                $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
         )
         target_link_options(cppcommon-platform-global-settings
-            INTERFACE -stdlib=libc++
+            INTERFACE
+                -stdlib=libc++
         )
     endif()
 
     # Configure common compiler warnings
     target_compile_options(cppcommon-platform-global-settings
-        INTERFACE -Wall -Werror -Wshadow -pedantic
+        INTERFACE
+            -Wall -Werror -Wshadow -pedantic
     )
 
     # Configure GCC compiler warnings
@@ -59,7 +62,7 @@ function(cppcommon_platform_configure_settings)
             LIBRT_SUPPORT
     )
 
-    target_link_libraries(cppcommon_platform_target_settings
+    target_link_libraries(cppcommon-platform-target-settings
         INTERFACE
             PkgConfig::LibUUID
             ${CMAKE_DL_LIBS}
@@ -68,10 +71,12 @@ function(cppcommon_platform_configure_settings)
 
     if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
         target_compile_definitions(cppcommon-platform-global-settings
-            INTERFACE LIBBFD_SUPPORT
+            INTERFACE
+                LIBBFD_SUPPORT
         )
-        target_link_libraries(cppcommon_platform_target_settings
-            INTERFACE cppcommon_platform_bfd
+        target_link_libraries(cppcommon-platform-target-settings
+            INTERFACE
+                cppcommon-platform-bfd
         )
     endif()
 endfunction()
