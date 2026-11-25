@@ -10,7 +10,7 @@ include(CMakePackageConfigHelpers)
 
 option(CPPCOMMON_ENABLE_TESTING            "Enable testing support"                    OFF)
 option(CPPCOMMON_BUILD_EXAMPLES            "Build examples"                            OFF)
-option(CPPCOMMON_BUILD_BENCHMARKS          "Build performance benchmarks"              OFF)
+option(CPPCOMMON_BUILD_PERFORMANCE          "Build performance benchmarks"              OFF)
 option(CPPCOMMON_BUILD_DOCUMENTATION       "Build documentation"                       OFF)
 option(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS "Enable extended stack trace symbolization" OFF)
 option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integration"   OFF)
@@ -61,7 +61,7 @@ target_link_libraries(cppcommon-global-settings
 )
 
 #
-# Settings configuration
+# Configure settings
 #
 
 cppcommon_platform_configure_settings()
@@ -70,17 +70,17 @@ cppcommon_examples_configure_settings()
 cppcommon_performance_configure_settings()
 
 #
-# Targets creation
+# Create targets
 #
 
-file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h"   "source/*.h")
-file(GLOB_RECURSE LIB_INLINE_FILES "include/*.inl" "source/*.inl")
-file(GLOB_RECURSE LIB_SOURCE_FILES "include/*.cpp" "source/*.cpp")
+file(GLOB_RECURSE CPPCOMMON_CORE_HEADER_FILES "include/*.h"   "source/*.h")
+file(GLOB_RECURSE CPPCOMMON_CORE_INLINE_FILES "include/*.inl" "source/*.inl")
+file(GLOB_RECURSE CPPCOMMON_CORE_SOURCE_FILES "include/*.cpp" "source/*.cpp")
 
 add_library(cppcommon
-    ${LIB_HEADER_FILES}
-    ${LIB_INLINE_FILES}
-    ${LIB_SOURCE_FILES}
+    ${CPPCOMMON_CORE_HEADER_FILES}
+    ${CPPCOMMON_CORE_INLINE_FILES}
+    ${CPPCOMMON_CORE_SOURCE_FILES}
 )
 
 add_library(CppCommon::CppCommon ALIAS cppcommon)
@@ -104,7 +104,7 @@ target_link_libraries(cppcommon
         fmt::fmt
     PRIVATE
         "$<BUILD_INTERFACE:cppcommon-global-settings>"
-        "$<BUILD_INTERFACE:cppcommon_platform_target_settings>"
+        "$<BUILD_INTERFACE:cppcommon-platform-target-settings>"
 )
 
 cppcommon_platform_create_targets()
@@ -113,7 +113,7 @@ cppcommon_examples_create_targets()
 cppcommon_performance_create_targets()
 
 #
-# Install rule configuration
+# Install
 #
 
 # Keep the core installation self-contained and relocatable.
@@ -132,23 +132,23 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
         PATTERN "*.inl"
 )
 
-set(cppcommon_package_dir "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
+set(CPPCOMMON_PACKAGE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppCommonConfig.cmake.in"
     "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
-    INSTALL_DESTINATION "${cppcommon_package_dir}"
+    INSTALL_DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
 )
 
 install(EXPORT CppCommonTargets
     FILE CppCommonTargets.cmake
     NAMESPACE CppCommon::
-    DESTINATION "${cppcommon_package_dir}"
+    DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
     COMPONENT Core
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
-    DESTINATION "${cppcommon_package_dir}"
+    DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
     COMPONENT Core
 )
 
