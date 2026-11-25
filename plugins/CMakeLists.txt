@@ -1,21 +1,31 @@
 set(CPPCOMMON_PLUGINS_TARGET_PREFIX "cppcommon-plugin-")
 set(CPPCOMMON_PLUGINS_OUTPUT_PREFIX "plugin-")
 
+#
+# Modules initialization
+#
+
 add_library(cppcommon-plugins-target-settings INTERFACE)
+
+set_property(GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS "")
+
+#
+# Settings configuration
+#
 
 target_include_directories(cppcommon-plugins-target-settings
     INTERFACE
         "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-# Build the shared libraries used by the DLL tests and example.
+#
+# Targets creation
+#
 file(GLOB CPPCOMMON_PLUGINS_DIRECTORIES
     LIST_DIRECTORIES true
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/*"
 )
-
-set_property(GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS "")
 
 foreach(CPPCOMMON_PLUGINS_NAME IN LISTS CPPCOMMON_PLUGINS_DIRECTORIES)
     if(NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${CPPCOMMON_PLUGINS_NAME}")
@@ -62,6 +72,10 @@ foreach(CPPCOMMON_PLUGINS_NAME IN LISTS CPPCOMMON_PLUGINS_DIRECTORIES)
         OUTPUT_NAME "${CPPCOMMON_PLUGINS_OUTPUT_PREFIX}${CPPCOMMON_PLUGINS_NAME}"
     )
 endforeach()
+
+#
+# Install rule configuration
+#
 
 get_property(CPPCOMMON_PLUGINS_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
