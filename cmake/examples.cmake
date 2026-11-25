@@ -6,6 +6,8 @@ set(CPPCOMMON_EXAMPLES_TARGET_PREFIX "cppcommon-example-")
 function(cppcommon_examples_init)
     add_library(cppcommon-examples-global-settings INTERFACE)
     add_library(cppcommon-examples-target-settings INTERFACE)
+
+    set_property(GLOBAL PROPERTY CPPCOMMON_EXAMPLES_TARGETS "")
 endfunction()
 
 # @brief    Configure examples settings
@@ -51,6 +53,8 @@ function(cppcommon_examples_create_targets)
             "${example_source_file}"
         )
 
+        set_property(GLOBAL APPEND PROPERTY CPPCOMMON_EXAMPLES_TARGETS ${example_target})
+
         target_link_libraries(${example_target}
             PRIVATE
                 cppcommon-global-settings
@@ -79,25 +83,24 @@ function(cppcommon_examples_install)
         return()
     endif()
 
-    file(GLOB example_source_files
-        "${CPPCOMMON_EXAMPLES_DIR}/*.cpp"
+    get_property(example_targets GLOBAL PROPERTY CPPCOMMON_EXAMPLES_TARGETS)
+
+    if(NOT example_targets)
+        return()
+    endif()
+
+    install(TARGETS ${example_targets}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        COMPONENT Examples
     )
 
-    foreach(example_source_file IN LISTS example_source_files)
-        get_filename_component(example_name "${example_source_file}" NAME_WE)
-        set(example_target "${CPPCOMMON_EXAMPLES_TARGET_PREFIX}${example_name}")
-
-        install(TARGETS ${example_target}
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            COMPONENT Examples
-        )
-
-        if(MSVC)
+    if(MSVC)
+        foreach(example_target IN LISTS example_targets)
             install(FILES "$<TARGET_PDB_FILE:${example_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
                 COMPONENT Examples
                 OPTIONAL
             )
-        endif()
-    endforeach()
+        endforeach()
+    endif()
 endfunction()
