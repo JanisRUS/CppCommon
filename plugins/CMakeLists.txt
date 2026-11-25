@@ -18,7 +18,8 @@ target_include_directories(cppcommon-plugins-target-settings
 # Targets creation
 #
 
-file(GLOB CPPCOMMON_PLUGINS_DIRECTORIES
+file(
+    GLOB             CPPCOMMON_PLUGINS_DIRECTORIES
     LIST_DIRECTORIES true
     RELATIVE         "${CPPCOMMON_PLUGINS_DIR}"
     "${CPPCOMMON_PLUGINS_DIR}/*"
