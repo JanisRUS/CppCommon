@@ -18,6 +18,9 @@ option(CPPCOMMON_ENABLE_VLD                "Enable Visual Leak Detector integrat
 set(CMAKE_CXX_STANDARD   23)
 set(CMAKE_CXX_EXTENSIONS ON)
 
+set(CPPCOMMON_INSTALL_COMPONENT "Core")
+set(CPPCOMMON_PACKAGE_DIR       "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
+
 #
 # Modules connection
 #
@@ -86,7 +89,7 @@ add_library(cppcommon
 add_library(CppCommon::CppCommon ALIAS cppcommon)
 set_target_properties(cppcommon PROPERTIES
     EXPORT_NAME CppCommon
-    FOLDER "libraries"
+    FOLDER      "libraries"
 )
 
 target_include_directories(cppcommon
@@ -116,20 +119,18 @@ cppcommon_performance_create_targets()
 # Keep the core installation self-contained and relocatable.
 install(TARGETS cppcommon
     EXPORT CppCommonTargets
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT Core
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT Core
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT Core
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT "${CPPCOMMON_INSTALL_COMPONENT}"
 )
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
-    COMPONENT Core
+    COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
     FILES_MATCHING
         PATTERN "*.h"
         PATTERN "*.inl"
 )
-
-set(CPPCOMMON_PACKAGE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
 
 configure_package_config_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppCommonConfig.cmake.in"
@@ -138,15 +139,15 @@ configure_package_config_file(
 )
 
 install(EXPORT CppCommonTargets
-    FILE CppCommonTargets.cmake
-    NAMESPACE CppCommon::
+    FILE        CppCommonTargets.cmake
+    NAMESPACE   CppCommon::
     DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
-    COMPONENT Core
+    COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
 )
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/CppCommonConfig.cmake"
     DESTINATION "${CPPCOMMON_PACKAGE_DIR}"
-    COMPONENT Core
+    COMPONENT   "${CPPCOMMON_INSTALL_COMPONENT}"
 )
 
 cppcommon_platform_install()
