@@ -1,3 +1,6 @@
+set(CPPCOMMON_PERFORMANCE_DIR "${CMAKE_CURRENT_LIST_DIR}/../performance")
+set(CPPCOMMON_PERFORMANCE_TARGET_PREFIX "cppcommon-performance-")
+
 # @brief    Initialize the performance module
 # @details  Create the performance settings targets
 # @note     Settings are currently empty
@@ -22,17 +25,15 @@ function(cppcommon_performance_create_targets)
         return()
     endif()
 
-    set(performance_directory "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../performance")
-
-    file(GLOB performance_header_files "${performance_directory}/*.h")
-    file(GLOB performance_inline_files "${performance_directory}/*.inl")
-    file(GLOB performance_source_files "${performance_directory}/*.cpp")
+    file(GLOB performance_header_files "${CPPCOMMON_PERFORMANCE_DIR}/*.h")
+    file(GLOB performance_inline_files "${CPPCOMMON_PERFORMANCE_DIR}/*.inl")
+    file(GLOB performance_source_files "${CPPCOMMON_PERFORMANCE_DIR}/*.cpp")
 
     set(performance_targets)
 
     foreach(performance_source_file IN LISTS performance_source_files)
         get_filename_component(performance_name "${performance_source_file}" NAME_WE)
-        set(performance_target "cppcommon-performance-${performance_name}")
+        set(performance_target "${CPPCOMMON_PERFORMANCE_TARGET_PREFIX}${performance_name}")
 
         add_executable(${performance_target}
             ${performance_header_files}
