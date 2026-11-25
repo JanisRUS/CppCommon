@@ -7,6 +7,8 @@ set(CPPCOMMON_PERFORMANCE_TARGET_PREFIX "cppcommon-performance-")
 function(cppcommon_performance_init)
     add_library(cppcommon-performance-global-settings INTERFACE)
     add_library(cppcommon-performance-target-settings INTERFACE)
+
+    set_property(GLOBAL PROPERTY CPPCOMMON_PERFORMANCE_TARGETS "")
 endfunction()
 
 # @brief    Configure performance module settings
@@ -29,8 +31,6 @@ function(cppcommon_performance_create_targets)
     file(GLOB performance_inline_files "${CPPCOMMON_PERFORMANCE_DIR}/*.inl")
     file(GLOB performance_source_files "${CPPCOMMON_PERFORMANCE_DIR}/*.cpp")
 
-    set(performance_targets)
-
     foreach(performance_source_file IN LISTS performance_source_files)
         get_filename_component(performance_name "${performance_source_file}" NAME_WE)
         set(performance_target "${CPPCOMMON_PERFORMANCE_TARGET_PREFIX}${performance_name}")
@@ -40,6 +40,8 @@ function(cppcommon_performance_create_targets)
             ${performance_inline_files}
             "${performance_source_file}"
         )
+
+        set_property(GLOBAL APPEND PROPERTY CPPCOMMON_PERFORMANCE_TARGETS ${performance_target})
 
         target_link_libraries(${performance_target}
             PRIVATE
@@ -51,11 +53,7 @@ function(cppcommon_performance_create_targets)
         set_target_properties(${performance_target} PROPERTIES
             FOLDER "performance"
         )
-
-        list(APPEND performance_targets ${performance_target})
     endforeach()
-
-    set(CPPCOMMON_PERFORMANCE_TARGETS "${performance_targets}" PARENT_SCOPE)
 endfunction()
 
 # @brief    Install performance artifacts
@@ -65,18 +63,24 @@ function(cppcommon_performance_install)
         return()
     endif()
 
-    foreach(performance_target IN LISTS CPPCOMMON_PERFORMANCE_TARGETS)
-        install(TARGETS ${performance_target}
-            RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-            COMPONENT Performance
-        )
+    get_property(performance_targets GLOBAL PROPERTY CPPCOMMON_PERFORMANCE_TARGETS)
 
-        if(MSVC)
+    if(NOT performance_targets)
+        return()
+    endif()
+
+    install(TARGETS ${performance_targets}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        COMPONENT Performance
+    )
+
+    if(MSVC)
+        foreach(performance_target IN LISTS performance_targets)
             install(FILES "$<TARGET_PDB_FILE:${performance_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
                 COMPONENT Performance
                 OPTIONAL
             )
-        endif()
-    endforeach()
+        endforeach()
+    endif()
 endfunction()
