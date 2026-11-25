@@ -24,26 +24,26 @@ function(cppcommon_tests_create_targets)
         return()
     endif()
 
-    plugins_check()
-    get_property(PLUGIN_TARGETS GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+    cppcommon_plugins_check()
+    get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
-    file(GLOB TESTS_HEADER_FILES
+    file(GLOB tests_header_files
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.h"
     )
-    file(GLOB TESTS_INLINE_FILES
+    file(GLOB tests_inline_files
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.inl"
     )
-    file(GLOB TESTS_SOURCE_FILES
+    file(GLOB tests_source_files
         "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
     )
 
     add_executable(cppcommon-tests
-        ${TESTS_HEADER_FILES}
-        ${TESTS_INLINE_FILES}
-        ${TESTS_SOURCE_FILES}
+        ${tests_header_files}
+        ${tests_inline_files}
+        ${tests_source_files}
     )
 
-    add_dependencies(cppcommon-tests ${PLUGIN_TARGETS})
+    add_dependencies(cppcommon-tests ${plugin_targets})
 
     set_target_properties(cppcommon-tests PROPERTIES
         FOLDER "tests"
