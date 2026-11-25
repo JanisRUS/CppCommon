@@ -7,12 +7,24 @@ function(cppcommon_platform_init)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LibUUID REQUIRED IMPORTED_TARGET uuid)
 
-    find_library(CPPCOMMON_RT_LIBRARY NAMES rt REQUIRED)
+    find_library(CPPCOMMON_RT_LIBRARY
+
+        NAMES rt
+
+        REQUIRED
+
+    )
     mark_as_advanced(CPPCOMMON_RT_LIBRARY)
 
     if(CPPCOMMON_ENABLE_STACKTRACE_SYMBOLS)
-        find_path(CPPCOMMON_BFD_INCLUDE_DIR NAMES bfd.h REQUIRED)
-        find_library(CPPCOMMON_BFD_LIBRARY NAMES bfd REQUIRED)
+        find_path(CPPCOMMON_BFD_INCLUDE_DIR
+            NAMES bfd.h
+            REQUIRED
+        )
+        find_library(CPPCOMMON_BFD_LIBRARY
+            NAMES bfd
+            REQUIRED
+        )
         mark_as_advanced(CPPCOMMON_BFD_INCLUDE_DIR CPPCOMMON_BFD_LIBRARY)
 
         add_library(cppcommon-platform-bfd UNKNOWN IMPORTED)
