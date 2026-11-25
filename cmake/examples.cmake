@@ -2,7 +2,7 @@ set(CPPCOMMON_EXAMPLES_DIR "${CMAKE_CURRENT_LIST_DIR}/../examples")
 set(CPPCOMMON_EXAMPLES_TARGET_PREFIX "cppcommon-example-")
 
 # @brief    Initialize the examples module
-# @details  Create the examples settings targets
+# @details  Create the examples settings targets and initialize the target list
 function(cppcommon_examples_init)
     add_library(cppcommon-examples-global-settings INTERFACE)
     add_library(cppcommon-examples-target-settings INTERFACE)
@@ -10,28 +10,21 @@ function(cppcommon_examples_init)
     set_property(GLOBAL PROPERTY CPPCOMMON_EXAMPLES_TARGETS "")
 endfunction()
 
-# @brief    Configure examples settings
-# @details  Configure usage requirements shared by examples
+# @brief    Configure examples module settings
+# @details  No additional example-specific settings are required
 function(cppcommon_examples_configure_settings)
-    # No additional example-specific settings are required yet
 endfunction()
 
-# @brief    Create example targets and rules
+# @brief    Create examples module targets
 # @details  Create example executables and connect the DLL fixtures used by system_dll
 function(cppcommon_examples_create_targets)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
         return()
     endif()
 
-    file(GLOB example_header_files
-        "${CPPCOMMON_EXAMPLES_DIR}/*.h"
-    )
-    file(GLOB example_inline_files
-        "${CPPCOMMON_EXAMPLES_DIR}/*.inl"
-    )
-    file(GLOB example_source_files
-        "${CPPCOMMON_EXAMPLES_DIR}/*.cpp"
-    )
+    file(GLOB example_header_files "${CPPCOMMON_EXAMPLES_DIR}/*.h")
+    file(GLOB example_inline_files "${CPPCOMMON_EXAMPLES_DIR}/*.inl")
+    file(GLOB example_source_files "${CPPCOMMON_EXAMPLES_DIR}/*.cpp")
 
     if(EXISTS "${CPPCOMMON_EXAMPLES_DIR}/system_dll.cpp")
         cppcommon_plugins_check()
@@ -76,8 +69,8 @@ function(cppcommon_examples_create_targets)
     endforeach()
 endfunction()
 
-# @brief    Install example artifacts
-# @details  Register example executables in the Examples component
+# @brief    Configure examples module installation
+# @details  Register the created example targets in the Examples component
 function(cppcommon_examples_install)
     if(NOT CPPCOMMON_BUILD_EXAMPLES)
         return()
