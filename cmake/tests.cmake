@@ -1,4 +1,5 @@
-set(CPPCOMMON_TESTS_DIR "${CMAKE_CURRENT_LIST_DIR}/../tests")
+set(CPPCOMMON_TESTS_DIR               "${CMAKE_CURRENT_LIST_DIR}/../tests")
+set(CPPCOMMON_TESTS_INSTALL_COMPONENT "Tests")
 
 # @brief    Initialize the tests module
 # @details  Create the tests settings targets and initialize the target list.
@@ -35,6 +36,8 @@ function(cppcommon_tests_create_targets)
     file(GLOB tests_inline_files "${CPPCOMMON_TESTS_DIR}/*.inl")
     file(GLOB tests_source_files "${CPPCOMMON_TESTS_DIR}/*.cpp")
 
+    cmake_path(GET CPPCOMMON_TESTS_DIR FILENAME tests_folder)
+
     add_executable(cppcommon-tests
         ${tests_header_files}
         ${tests_inline_files}
@@ -45,8 +48,9 @@ function(cppcommon_tests_create_targets)
 
     add_dependencies(cppcommon-tests ${plugin_targets})
 
-    set_target_properties(cppcommon-tests PROPERTIES
-        FOLDER "tests"
+    set_target_properties(cppcommon-tests
+        PROPERTIES
+            FOLDER "${tests_folder}"
     )
 
     target_link_libraries(cppcommon-tests
@@ -58,7 +62,8 @@ function(cppcommon_tests_create_targets)
     )
 
     enable_testing()
-    add_test(NAME cppcommon-tests
+    add_test(
+        NAME    cppcommon-tests
         COMMAND cppcommon-tests --durations yes --order lex
     )
 endfunction()
@@ -72,16 +77,18 @@ function(cppcommon_tests_install)
         return()
     endif()
 
-    install(TARGETS ${tests_targets}
+    install(
+        TARGETS ${tests_targets}
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-        COMPONENT Tests
+        COMPONENT "${CPPCOMMON_TESTS_INSTALL_COMPONENT}"
     )
 
     if(MSVC)
         foreach(tests_target IN LISTS tests_targets)
-            install(FILES "$<TARGET_PDB_FILE:${tests_target}>"
+            install(
+                FILES       "$<TARGET_PDB_FILE:${tests_target}>"
                 DESTINATION "${CMAKE_INSTALL_BINDIR}"
-                COMPONENT Tests
+                COMPONENT   "${CPPCOMMON_TESTS_INSTALL_COMPONENT}"
                 OPTIONAL
             )
         endforeach()
