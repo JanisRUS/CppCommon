@@ -1,9 +1,9 @@
 # @brief    Check whether plugin targets exist
-# @details  Checks whether CPPCOMMON_PLUGIN_TARGETS is populated.
+# @details  Checks whether CPPCOMMON_PLUGINS_TARGETS is populated.
 #           If not, it adds the plugins subdirectory.
-#           Fails if plugin targets are still unavailable.
-function(plugins_check)
-    get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+#           Fails if plugin targets are still unavailable
+function(cppcommon_plugins_check)
+    get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
     if(NOT plugin_targets)
         add_subdirectory(
@@ -11,7 +11,7 @@ function(plugins_check)
             "${CMAKE_CURRENT_BINARY_DIR}/plugins"
         )
 
-        get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGIN_TARGETS)
+        get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
     endif()
 
     if(NOT plugin_targets)
