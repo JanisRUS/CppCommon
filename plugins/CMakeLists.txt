@@ -1,17 +1,13 @@
+#
+# Common configuration
+#
+
 set(CPPCOMMON_PLUGINS_TARGET_PREFIX "cppcommon-plugin-")
 set(CPPCOMMON_PLUGINS_OUTPUT_PREFIX "plugin-")
-
-#
-# Modules initialization
-#
 
 add_library(cppcommon-plugins-target-settings INTERFACE)
 
 set_property(GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS "")
-
-#
-# Settings configuration
-#
 
 target_include_directories(cppcommon-plugins-target-settings
     INTERFACE
@@ -21,6 +17,7 @@ target_include_directories(cppcommon-plugins-target-settings
 #
 # Targets creation
 #
+
 file(GLOB CPPCOMMON_PLUGINS_DIRECTORIES
     LIST_DIRECTORIES true
     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
