@@ -1,7 +1,8 @@
 set(CPPCOMMON_TESTS_DIR "${CMAKE_CURRENT_LIST_DIR}/../tests")
 
 # @brief    Initialize the tests module
-# @details  Create the tests settings targets and find required dependencies
+# @details  Create the tests settings targets and initialize the target list.
+#           Discover required dependencies when testing is enabled
 function(cppcommon_tests_init)
     add_library(cppcommon-tests-global-settings INTERFACE)
     add_library(cppcommon-tests-target-settings INTERFACE)
@@ -15,14 +16,13 @@ function(cppcommon_tests_init)
     find_package(Catch2 3 CONFIG REQUIRED)
 endfunction()
 
-# @brief    Configure tests settings
-# @details  Configure usage requirements shared by tests
+# @brief    Configure tests module settings
+# @details  No additional test-specific settings are required
 function(cppcommon_tests_configure_settings)
-    # No additional test-specific settings are required yet
 endfunction()
 
-# @brief    Create test-related targets and rules
-# @details  Create the test executable, its plugin fixtures, and register it with CTest
+# @brief    Create tests module targets
+# @details  Create the test executable, connect its plugin fixtures, and register it with CTest
 function(cppcommon_tests_create_targets)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
@@ -31,15 +31,9 @@ function(cppcommon_tests_create_targets)
     cppcommon_plugins_check()
     get_property(plugin_targets GLOBAL PROPERTY CPPCOMMON_PLUGINS_TARGETS)
 
-    file(GLOB tests_header_files
-        "${CPPCOMMON_TESTS_DIR}/*.h"
-    )
-    file(GLOB tests_inline_files
-        "${CPPCOMMON_TESTS_DIR}/*.inl"
-    )
-    file(GLOB tests_source_files
-        "${CPPCOMMON_TESTS_DIR}/*.cpp"
-    )
+    file(GLOB tests_header_files "${CPPCOMMON_TESTS_DIR}/*.h")
+    file(GLOB tests_inline_files "${CPPCOMMON_TESTS_DIR}/*.inl")
+    file(GLOB tests_source_files "${CPPCOMMON_TESTS_DIR}/*.cpp")
 
     add_executable(cppcommon-tests
         ${tests_header_files}
@@ -69,8 +63,8 @@ function(cppcommon_tests_create_targets)
     )
 endfunction()
 
-# @brief    Install test artifacts
-# @details  Register the test executable in the Tests component
+# @brief    Configure tests module installation
+# @details  Register the created test targets in the Tests component
 function(cppcommon_tests_install)
     if(NOT CPPCOMMON_ENABLE_TESTING)
         return()
