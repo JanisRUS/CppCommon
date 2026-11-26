@@ -27,16 +27,7 @@ set(CPPCOMMON_PACKAGE_DIR       "${CMAKE_INSTALL_LIBDIR}/cmake/CppCommon")
 # Modules connection
 #
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    include(cmake/windows.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    include(cmake/macos.cmake)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    include(cmake/linux.cmake)
-else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-endif()
-
+include(cmake/platform.cmake)
 include(cmake/plugins.cmake)
 include(cmake/tests.cmake)
 include(cmake/examples.cmake)
