@@ -1,3 +1,13 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    include("${CMAKE_CURRENT_LIST_DIR}/gnu.cmake")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    include("${CMAKE_CURRENT_LIST_DIR}/clang.cmake")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    include("${CMAKE_CURRENT_LIST_DIR}/msvc.cmake")
+else()
+    message(FATAL_ERROR "Unsupported Windows compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
 # @brief    Initialize Windows platform support
 # @details  Create platform settings targets and discover enabled optional dependencies
 function(cppcommon_platform_init)
@@ -49,59 +59,9 @@ endfunction()
 # @brief    Configure Windows platform settings
 # @details  Populate platform settings targets with compiler options and dependencies
 function(cppcommon_platform_configure_settings)
+    cppcommon_platform_configure_compiler_settings()
+
     set(platform_compile_definitions)
-    set(platform_compile_options)
-    set(platform_link_options)
-
-    # Configure Clang compiler settings
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(cppcommon-platform-global-settings
-            INTERFACE
-                $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
-        )
-        target_link_options(cppcommon-platform-global-settings
-            INTERFACE
-                -stdlib=libc++
-        )
-    endif()
-
-    # Configure GCC and Clang compiler warnings
-    if(NOT MSVC)
-        list(APPEND platform_compile_options -Wall -Werror -Wshadow -pedantic)
-
-        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-            list(APPEND platform_compile_options
-                -Wno-maybe-uninitialized
-                -Wno-overflow
-                -Wno-restrict
-                -Wno-stringop-overflow
-            )
-        endif()
-    endif()
-
-    # Configure MinGW-w64 compiler options
-    if(MINGW)
-        # Increase the number of sections that an object file can contain
-        list(APPEND platform_compile_options -Wa,-mbig-obj)
-
-        # Link the GCC and C++ standard libraries statically
-        list(APPEND platform_link_options -static-libgcc -static-libstdc++)
-    endif()
-
-    # Configure Visual Studio compiler options
-    if(MSVC)
-        # Increase the number of sections that an object file can contain
-        list(APPEND platform_compile_options /bigobj)
-
-        # Use UTF-8 for source and execution character sets
-        list(APPEND platform_compile_options /utf-8)
-
-        # Report the correct value of __cplusplus
-        list(APPEND platform_compile_options /Zc:__cplusplus)
-
-        # Configure compiler warnings
-        list(APPEND platform_compile_options /W4 /WX /wd4100 /wd4250)
-    endif()
 
     # Configure Windows platform definitions
     if(CYGWIN)
@@ -147,20 +107,6 @@ function(cppcommon_platform_configure_settings)
         target_compile_definitions(cppcommon-platform-global-settings
             INTERFACE
                 ${platform_compile_definitions}
-        )
-    endif()
-
-    if(platform_compile_options)
-        target_compile_options(cppcommon-platform-global-settings
-            INTERFACE
-                ${platform_compile_options}
-        )
-    endif()
-
-    if(platform_link_options)
-        target_link_options(cppcommon-platform-global-settings
-            INTERFACE
-                ${platform_link_options}
         )
     endif()
 
