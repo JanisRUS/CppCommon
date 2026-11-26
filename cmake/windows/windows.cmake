@@ -1,4 +1,9 @@
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CYGWIN)
+    if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|MSVC)$")
+        message(FATAL_ERROR "Unsupported Cygwin compiler: ${CMAKE_CXX_COMPILER_ID}")
+    endif()
+    include("${CMAKE_CURRENT_LIST_DIR}/cygwin.cmake")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     include("${CMAKE_CURRENT_LIST_DIR}/gnu.cmake")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     include("${CMAKE_CURRENT_LIST_DIR}/clang.cmake")
@@ -60,55 +65,6 @@ endfunction()
 # @details  Populate platform settings targets with compiler options and dependencies
 function(cppcommon_platform_configure_settings)
     cppcommon_platform_configure_compiler_settings()
-
-    set(platform_compile_definitions)
-
-    # Configure Windows platform definitions
-    if(CYGWIN)
-        list(APPEND platform_compile_definitions
-            WIN32
-            WIN32_LEAN_AND_MEAN
-            _WIN32_WINNT=0x0A00
-        )
-    elseif(WIN32)
-        list(APPEND platform_compile_definitions
-            WIN32
-            WIN32_LEAN_AND_MEAN
-            _CRT_SECURE_NO_DEPRECATE
-            _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-            _WIN32_WINNT=0x0A00
-        )
-
-        # Determine the Windows SDK version
-        if(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION AND NOT MINGW)
-            string(REGEX REPLACE
-                "^([0-9]+)\\.([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-                "\\3"
-                windows_sdk_version
-                "${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}"
-            )
-        else()
-            string(REGEX REPLACE
-                "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
-                "\\3"
-                windows_sdk_version
-                "${CMAKE_SYSTEM_VERSION}"
-            )
-        endif()
-
-        if(windows_sdk_version)
-            list(APPEND platform_compile_definitions
-                _WIN32_SDK=${windows_sdk_version}
-            )
-        endif()
-    endif()
-
-    if(platform_compile_definitions)
-        target_compile_definitions(cppcommon-platform-global-settings
-            INTERFACE
-                ${platform_compile_definitions}
-        )
-    endif()
 
     # Configure Windows system and optional libraries for the core target
     target_include_directories(cppcommon-platform-target-settings
