@@ -1,3 +1,11 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    include("${CMAKE_CURRENT_LIST_DIR}/gnu.cmake")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    include("${CMAKE_CURRENT_LIST_DIR}/clang.cmake")
+else()
+    message(FATAL_ERROR "Unsupported Linux compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
+
 # @brief    Initialize Linux platform support
 # @details  Discover Linux system libraries and create platform settings targets
 function(cppcommon_platform_init)
@@ -36,34 +44,7 @@ endfunction()
 # @brief    Configure Linux platform settings
 # @details  Populate platform settings targets with compiler options and dependencies
 function(cppcommon_platform_configure_settings)
-    # Configure Clang compiler settings
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(cppcommon-platform-global-settings
-            INTERFACE
-                $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>
-        )
-        target_link_options(cppcommon-platform-global-settings
-            INTERFACE
-                -stdlib=libc++
-        )
-    endif()
-
-    # Configure common compiler warnings
-    target_compile_options(cppcommon-platform-global-settings
-        INTERFACE
-            -Wall -Werror -Wshadow -pedantic
-    )
-
-    # Configure GCC compiler warnings
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_compile_options(cppcommon-platform-global-settings
-            INTERFACE
-                -Wno-maybe-uninitialized
-                -Wno-overflow
-                -Wno-restrict
-                -Wno-stringop-overflow
-        )
-    endif()
+    cppcommon_platform_configure_compiler_settings()
 
     target_compile_definitions(cppcommon-platform-global-settings
         INTERFACE
