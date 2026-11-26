@@ -1,4 +1,4 @@
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
     include("${CMAKE_CURRENT_LIST_DIR}/windows/windows.cmake")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     include("${CMAKE_CURRENT_LIST_DIR}/macos/macos.cmake")
